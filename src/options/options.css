@@ -1,0 +1,439 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens (shared with popup) ──────────────────────────────────── */
+
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #F5F5F5;
+    --bg-tertiary: #EBECF6;
+    --bg-hover: #D7D8EE;
+    --text-primary: #121417;
+    --text-secondary: #3d4249;
+    --text-muted: #5a6069;
+    --border: #DEE0E3;
+    --accent: #1D2592;
+    --accent-hover: #121972;
+    --accent-glow: rgba(29, 37, 146, 0.1);
+    --success: #188038;
+    --danger: #D93025;
+    --radius: 4px;
+    --radius-sm: 4px;
+    --transition: 150ms ease;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #121417;
+    --bg-secondary: #1a1d22;
+    --bg-tertiary: #24272e;
+    --bg-hover: #30343d;
+    --text-primary: #F5F5F5;
+    --text-secondary: #3d4249;
+    --text-muted: #6b7280;
+    --border: #30343d;
+    --accent: #5057B8;
+    --accent-hover: #868BCB;
+    --accent-glow: rgba(80, 87, 184, 0.15);
+}
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Layout ──────────────────────────────────────────────────────────────── */
+
+.options-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.options-header {
+    margin-bottom: 24px;
+}
+
+.options-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* ─── Tabs ────────────────────────────────────────────────────────────────── */
+
+.options-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all var(--transition);
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+}
+
+.tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ─── Content ─────────────────────────────────────────────────────────────── */
+
+.tab-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ─── Form Groups ─────────────────────────────────────────────────────────── */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group > label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="url"],
+.form-group input[type="password"] {
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+.form-group input:focus {
+    border-color: var(--accent);
+}
+
+.form-group input[type="range"] {
+    accent-color: var(--accent);
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.toggle-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.toggle-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+}
+
+/* ─── Segmented Control ───────────────────────────────────────────────────── */
+
+.segmented-control {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.segmented-control button {
+    flex: 1;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all var(--transition);
+}
+
+.segmented-control button:hover {
+    color: var(--text-primary);
+}
+
+.segmented-control button.seg-active {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ─── Test Button ─────────────────────────────────────────────────────────── */
+
+.test-btn {
+    padding: 8px 16px;
+    background: var(--accent-glow);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all var(--transition);
+}
+
+.test-btn:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.test-btn.success {
+    border-color: var(--success);
+    color: var(--success);
+    background: rgba(63, 185, 80, 0.1);
+}
+
+.test-btn.fail {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: rgba(248, 81, 73, 0.1);
+}
+
+.test-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ─── Cloud Notice ────────────────────────────────────────────────────────── */
+
+.cloud-notice {
+    padding: 16px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(0, 180, 255, 0.2);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* ─── History ─────────────────────────────────────────────────────────────── */
+
+.history-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.clear-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all var(--transition);
+}
+
+.clear-btn:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.history-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+.history-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.history-name {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.history-copy,
+.history-delete {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all var(--transition);
+}
+
+.history-copy:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.history-delete:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+}
+
+/* ─── Footer Block ────────────────────────────────────────────────────────── */
+
+.options-footer-block {
+    margin-top: 32px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.donate-section {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.donate-text {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.donate-close {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition);
+}
+
+.donate-close:hover {
+    color: var(--text-primary);
+}
+
+.donate-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all var(--transition);
+}
+
+.donate-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.donate-btn svg {
+    flex-shrink: 0;
+}
+
+.footer-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 14px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.footer-info a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.footer-info a:hover {
+    text-decoration: underline;
+}

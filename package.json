@@ -1,0 +1,36 @@
+{
+  "name": "proscreen-s3",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && BUILD_TARGET=content vite build && BUILD_TARGET=background vite build && BUILD_TARGET=editor vite build && BUILD_TARGET=offscreen vite build && rm -rf dist/.DS_Store",
+    "build:popup": "vite build",
+    "build:content": "BUILD_TARGET=content vite build",
+    "build:background": "BUILD_TARGET=background vite build",
+    "build:editor": "BUILD_TARGET=editor vite build",
+    "build:offscreen": "BUILD_TARGET=offscreen vite build",
+    "build:firefox": "npm run build && node scripts/build-firefox.js",
+    "zip": "npm run build && cd dist && zip -r ../proscreen-s3-v$npm_package_version.zip . && cd .. && echo 'Created proscreen-s3-v'$npm_package_version'.zip'",
+    "zip:firefox": "npm run build:firefox && cd dist-firefox && zip -r ../proscreen-s3-firefox-v$npm_package_version.zip . && cd .. && echo 'Created Firefox zip'",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.7",
+    "@types/chrome": "^0.0.318",
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.5",
+    "@vitejs/plugin-react": "^4.5.2",
+    "jsdom": "^26.1.0",
+    "tailwindcss": "^4.1.7",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.1.4"
+  }
+}
