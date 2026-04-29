@@ -21,11 +21,19 @@ export const MSG = {
     UPLOAD_COMPLETE: 'UPLOAD_COMPLETE',
     UPLOAD_ERROR: 'UPLOAD_ERROR',
 
+    // Full-page capture
+    FULLPAGE_GET_INFO: 'FULLPAGE_GET_INFO',
+    FULLPAGE_SCROLL: 'FULLPAGE_SCROLL',
+    FULLPAGE_DONE: 'FULLPAGE_DONE',
+
     // Editor
     OPEN_EDITOR: 'OPEN_EDITOR',
 
     // Settings
     SETTINGS_CHANGED: 'SETTINGS_CHANGED',
+
+    // Recording state query
+    GET_RECORDING_STATE: 'GET_RECORDING_STATE',
 } as const;
 
 export type MessageType = (typeof MSG)[keyof typeof MSG];

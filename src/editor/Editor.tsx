@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { getSettings } from '../utils/storage';
 import { uploadToS3 } from '../lib/s3-upload';
 import { addHistoryItem, generateId } from '../lib/history';
@@ -13,20 +13,23 @@ const I = {
     arrow: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 19L19 5"/><path d="M19 5v10"/><path d="M19 5H9"/></svg>,
     rect: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>,
     text: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>,
-    blur: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>,
+    blur: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>,
     crop: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>,
     download: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
     upload: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+    copy: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
+    check: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
     undo: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>,
     redo: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>,
 };
 
-type ToolKey = 'pen' | 'arrow' | 'rect' | 'text' | 'crop';
+type ToolKey = 'pen' | 'arrow' | 'rect' | 'text' | 'blur' | 'crop';
 const TOOLS: { key: ToolKey; label: string }[] = [
     { key: 'pen', label: 'Pen' },
     { key: 'arrow', label: 'Arrow' },
     { key: 'rect', label: 'Rectangle' },
     { key: 'text', label: 'Text' },
+    { key: 'blur', label: 'Blur' },
     { key: 'crop', label: 'Crop' },
 ];
 
@@ -39,25 +42,30 @@ const Editor: React.FC = () => {
     const [color, setColor] = useState('#ff3b30');
     const [lineWidth, setLineWidth] = useState(3);
 
-    // Drawing state
+    // Drawing state (refs — no re-render needed)
     const isDrawing = useRef(false);
     const startPos = useRef({ x: 0, y: 0 });
-    const points = useRef<{ x: number; y: number }[]>([]);
+    const lastPenPoint = useRef<{ x: number; y: number } | null>(null);
     const snapshotBeforeDraw = useRef<ImageData | null>(null);
 
-    // Undo/Redo
-    const [history, setHistory] = useState<ImageData[]>([]);
-    const [historyIdx, setHistoryIdx] = useState(-1);
+    // History via refs to avoid stale-closure bugs in saveSnapshot
+    type HistoryEntry = { data: ImageData; w: number; h: number };
+    const historyStack = useRef<HistoryEntry[]>([]);
+    const historyIdx = useRef(-1);
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
 
     // Upload
     const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle');
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadUrl, setUploadUrl] = useState('');
+    const [urlCopied, setUrlCopied] = useState(false);
 
-    // Text input
-    const [textInput, setTextInput] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
+    // Text input — canvasX/Y captured at click time to avoid scroll-drift in commitText
+    const [textInput, setTextInput] = useState<{ x: number; y: number; canvasX: number; canvasY: number; visible: boolean }>({ x: 0, y: 0, canvasX: 0, canvasY: 0, visible: false });
     const [textValue, setTextValue] = useState('');
     const textRef = useRef<HTMLInputElement>(null);
+    const textCommittedRef = useRef(false); // prevents double-commit from Enter + onBlur
 
     // Crop
     const [cropRect, setCropRect] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
@@ -77,15 +85,62 @@ const Editor: React.FC = () => {
                 const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
                 ctx.drawImage(img, 0, 0);
                 setImageLoaded(true);
-                // Save initial state
-                const initial = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                setHistory([initial]);
-                setHistoryIdx(0);
+                pushHistory(ctx.getImageData(0, 0, canvas.width, canvas.height), canvas.width, canvas.height);
                 chrome.storage.local.remove('_pendingCapture');
             };
             img.src = dataUrl;
         });
     }, []);
+
+    // Focus text input after React commits the DOM — autoFocus on conditional render is unreliable
+    useEffect(() => {
+        if (textInput.visible) {
+            textRef.current?.focus();
+        }
+    }, [textInput.visible, textInput.x, textInput.y]);
+
+    // ─── History (ref-based) ─────────────────────────────────────────────────
+
+    const pushHistory = (snap: ImageData, w: number, h: number) => {
+        const newStack = historyStack.current.slice(0, historyIdx.current + 1);
+        newStack.push({ data: snap, w, h });
+        if (newStack.length > 50) newStack.shift();
+        historyStack.current = newStack;
+        historyIdx.current = newStack.length - 1;
+        setCanUndo(historyIdx.current > 0);
+        setCanRedo(false);
+    };
+
+    const saveSnapshot = () => {
+        const ctx = getCtx();
+        if (!ctx || !canvasRef.current) return;
+        const { width, height } = canvasRef.current;
+        pushHistory(ctx.getImageData(0, 0, width, height), width, height);
+    };
+
+    const restoreEntry = (entry: HistoryEntry) => {
+        const ctx = getCtx();
+        if (!ctx || !canvasRef.current) return;
+        canvasRef.current.width = entry.w;
+        canvasRef.current.height = entry.h;
+        ctx.putImageData(entry.data, 0, 0);
+    };
+
+    const handleUndo = () => {
+        if (historyIdx.current <= 0) return;
+        historyIdx.current--;
+        restoreEntry(historyStack.current[historyIdx.current]);
+        setCanUndo(historyIdx.current > 0);
+        setCanRedo(true);
+    };
+
+    const handleRedo = () => {
+        if (historyIdx.current >= historyStack.current.length - 1) return;
+        historyIdx.current++;
+        restoreEntry(historyStack.current[historyIdx.current]);
+        setCanUndo(true);
+        setCanRedo(historyIdx.current < historyStack.current.length - 1);
+    };
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
@@ -99,37 +154,6 @@ const Editor: React.FC = () => {
         return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
     };
 
-    const saveSnapshot = useCallback(() => {
-        const ctx = getCtx();
-        if (!ctx || !canvasRef.current) return;
-        const snap = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
-        const newHistory = history.slice(0, historyIdx + 1);
-        newHistory.push(snap);
-        if (newHistory.length > 50) newHistory.shift();
-        setHistory(newHistory);
-        setHistoryIdx(newHistory.length - 1);
-    }, [history, historyIdx]);
-
-    // ─── Undo / Redo ─────────────────────────────────────────────────────────
-
-    const handleUndo = () => {
-        if (historyIdx <= 0) return;
-        const ctx = getCtx();
-        if (!ctx) return;
-        const newIdx = historyIdx - 1;
-        ctx.putImageData(history[newIdx], 0, 0);
-        setHistoryIdx(newIdx);
-    };
-
-    const handleRedo = () => {
-        if (historyIdx >= history.length - 1) return;
-        const ctx = getCtx();
-        if (!ctx) return;
-        const newIdx = historyIdx + 1;
-        ctx.putImageData(history[newIdx], 0, 0);
-        setHistoryIdx(newIdx);
-    };
-
     // ─── Pointer Events ──────────────────────────────────────────────────────
 
     const onPointerDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -138,24 +162,19 @@ const Editor: React.FC = () => {
         if (!ctx || !canvasRef.current) return;
 
         if (activeTool === 'text') {
-            setTextInput({ x: e.clientX, y: e.clientY, visible: true });
+            textCommittedRef.current = false;
+            const canvasPos = getCanvasPos(e);
+            setTextInput({ x: e.clientX, y: e.clientY, canvasX: canvasPos.x, canvasY: canvasPos.y, visible: true });
             setTextValue('');
-            setTimeout(() => textRef.current?.focus(), 50);
             return;
         }
 
         isDrawing.current = true;
         startPos.current = pos;
-        points.current = [pos];
         snapshotBeforeDraw.current = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
 
         if (activeTool === 'pen') {
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
+            lastPenPoint.current = pos;
         }
     };
 
@@ -164,44 +183,63 @@ const Editor: React.FC = () => {
         const pos = getCanvasPos(e);
         const ctx = getCtx();
         if (!ctx || !canvasRef.current) return;
+        const s = startPos.current;
 
         if (activeTool === 'pen') {
+            // Draw only the new segment — avoids re-stroking the full path
+            const last = lastPenPoint.current ?? s;
+            ctx.beginPath();
+            ctx.moveTo(last.x, last.y);
             ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            points.current.push(pos);
-        } else {
-            if (snapshotBeforeDraw.current) {
-                ctx.putImageData(snapshotBeforeDraw.current, 0, 0);
-            }
-            const s = startPos.current;
             ctx.strokeStyle = color;
             ctx.lineWidth = lineWidth;
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            lastPenPoint.current = pos;
+            return;
+        }
 
-            if (activeTool === 'arrow') {
-                drawArrow(ctx, s.x, s.y, pos.x, pos.y);
-            } else if (activeTool === 'rect') {
-                ctx.strokeRect(s.x, s.y, pos.x - s.x, pos.y - s.y);
-            } else if (activeTool === 'crop') {
-                // Draw crop preview with dimmed overlay
-                const cx = Math.min(s.x, pos.x), cy = Math.min(s.y, pos.y);
-                const cw = Math.abs(pos.x - s.x), ch = Math.abs(pos.y - s.y);
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-                // Clear the selected area to show original
-                if (snapshotBeforeDraw.current) {
-                    const cropped = new ImageData(
-                        new Uint8ClampedArray(snapshotBeforeDraw.current.data),
-                        snapshotBeforeDraw.current.width, snapshotBeforeDraw.current.height
-                    );
-                    ctx.putImageData(cropped, 0, 0, cx, cy, cw, ch);
-                }
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([6, 4]);
-                ctx.strokeRect(cx, cy, cw, ch);
-                ctx.setLineDash([]);
+        // Restore snapshot before redrawing shape preview
+        if (snapshotBeforeDraw.current) {
+            ctx.putImageData(snapshotBeforeDraw.current, 0, 0);
+        }
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (activeTool === 'arrow') {
+            drawArrow(ctx, s.x, s.y, pos.x, pos.y);
+        } else if (activeTool === 'rect') {
+            ctx.strokeRect(s.x, s.y, pos.x - s.x, pos.y - s.y);
+        } else if (activeTool === 'blur') {
+            const bx = Math.min(s.x, pos.x), by = Math.min(s.y, pos.y);
+            const bw = Math.abs(pos.x - s.x), bh = Math.abs(pos.y - s.y);
+            if (bw > 4 && bh > 4) {
+                applyPixelBlur(ctx, bx, by, bw, bh);
             }
+            // Show selection border
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 3]);
+            ctx.strokeRect(bx, by, bw, bh);
+            ctx.setLineDash([]);
+        } else if (activeTool === 'crop') {
+            const cx = Math.min(s.x, pos.x), cy = Math.min(s.y, pos.y);
+            const cw = Math.abs(pos.x - s.x), ch = Math.abs(pos.y - s.y);
+            // Dim everything outside crop
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            if (snapshotBeforeDraw.current) {
+                ctx.putImageData(snapshotBeforeDraw.current, 0, 0, cx, cy, cw, ch);
+            }
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 4]);
+            ctx.strokeRect(cx, cy, cw, ch);
+            ctx.setLineDash([]);
         }
     };
 
@@ -220,6 +258,16 @@ const Editor: React.FC = () => {
             if (cw > 10 && ch > 10) {
                 setCropRect({ x: Math.round(cx), y: Math.round(cy), w: Math.round(cw), h: Math.round(ch) });
             }
+        } else if (activeTool === 'blur') {
+            // Restore clean snapshot, re-apply blur without the selection border
+            if (snapshotBeforeDraw.current) ctx.putImageData(snapshotBeforeDraw.current, 0, 0);
+            const bx = Math.min(s.x, pos.x), by = Math.min(s.y, pos.y);
+            const bw = Math.abs(pos.x - s.x), bh = Math.abs(pos.y - s.y);
+            if (bw > 4 && bh > 4) applyPixelBlur(ctx, bx, by, bw, bh);
+            saveSnapshot();
+        } else if (activeTool === 'pen') {
+            lastPenPoint.current = null;
+            saveSnapshot();
         } else {
             saveSnapshot();
         }
@@ -228,7 +276,7 @@ const Editor: React.FC = () => {
     // ─── Drawing Helpers ─────────────────────────────────────────────────────
 
     function drawArrow(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
-        const headLen = 14;
+        const headLen = Math.max(12, lineWidth * 4);
         const angle = Math.atan2(y2 - y1, x2 - x1);
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -243,25 +291,37 @@ const Editor: React.FC = () => {
         ctx.fill();
     }
 
+    function applyPixelBlur(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+        const pixelSize = Math.max(4, Math.round(Math.min(w, h) / 10));
+        const tmp = document.createElement('canvas');
+        tmp.width = Math.max(1, Math.round(w / pixelSize));
+        tmp.height = Math.max(1, Math.round(h / pixelSize));
+        const tmpCtx = tmp.getContext('2d')!;
+        tmpCtx.imageSmoothingEnabled = false;
+        tmpCtx.drawImage(ctx.canvas, x, y, w, h, 0, 0, tmp.width, tmp.height);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(tmp, 0, 0, tmp.width, tmp.height, x, y, w, h);
+        ctx.imageSmoothingEnabled = true;
+    }
+
     // ─── Text Commit ─────────────────────────────────────────────────────────
 
     const commitText = () => {
-        if (!textValue.trim()) { setTextInput({ ...textInput, visible: false }); return; }
+        if (textCommittedRef.current) return; // guard against Enter + onBlur double-fire
+        if (!textValue.trim()) { setTextInput((prev) => ({ ...prev, visible: false })); return; }
+
+        textCommittedRef.current = true;
         const ctx = getCtx();
         if (!ctx || !canvasRef.current) return;
-        const canvas = canvasRef.current;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const cx = (textInput.x - rect.left) * scaleX;
-        const cy = (textInput.y - rect.top) * scaleY;
+        const cx = textInput.canvasX;
+        const cy = textInput.canvasY;
         const fontSize = Math.max(20, lineWidth * 8);
         ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
         ctx.fillStyle = color;
         ctx.textBaseline = 'top';
         ctx.fillText(textValue, cx, cy);
         ctx.textBaseline = 'alphabetic';
-        setTextInput({ ...textInput, visible: false });
+        setTextInput((prev) => ({ ...prev, visible: false }));
         saveSnapshot();
     };
 
@@ -311,7 +371,6 @@ const Editor: React.FC = () => {
             const filename = generateFilename(format);
             const result = await uploadToS3(settings.s3, filename, blob, (p) => setUploadProgress(p.percentage));
 
-            // Save to history
             await addHistoryItem({
                 id: generateId(),
                 url: result.url,
@@ -329,10 +388,13 @@ const Editor: React.FC = () => {
         }
     };
 
-    // ─── Render ──────────────────────────────────────────────────────────────
+    const handleCopyUrl = async () => {
+        await copyToClipboard(uploadUrl);
+        setUrlCopied(true);
+        setTimeout(() => setUrlCopied(false), 2000);
+    };
 
-    const canUndo = historyIdx > 0;
-    const canRedo = historyIdx < history.length - 1;
+    // ─── Render ──────────────────────────────────────────────────────────────
 
     return (
         <div className="editor-container">
@@ -365,18 +427,33 @@ const Editor: React.FC = () => {
                 </div>
             </header>
 
-            {/* Upload status bar */}
+            {/* Upload progress bar */}
             {uploadState === 'uploading' && (
                 <div className="upload-bar"><div className="upload-bar-fill" style={{ width: `${uploadProgress}%` }} /></div>
             )}
+
+            {/* Persistent URL bar — stays visible until next upload */}
             {uploadState === 'done' && (
-                <div className="upload-toast success" onClick={() => { copyToClipboard(uploadUrl); setUploadState('idle'); }}>
-                    Uploaded! Click to copy: {uploadUrl.slice(0, 60)}...
+                <div className="upload-url-bar">
+                    <span className="upload-url-label">Uploaded:</span>
+                    <input
+                        className="upload-url-input"
+                        readOnly
+                        value={uploadUrl}
+                        onFocus={(e) => e.target.select()}
+                    />
+                    <button className="upload-url-copy" onClick={handleCopyUrl} title="Copy URL">
+                        {urlCopied ? I.check : I.copy}
+                        <span>{urlCopied ? 'Copied!' : 'Copy'}</span>
+                    </button>
+                    <button className="upload-url-close" onClick={() => setUploadState('idle')} title="Dismiss">×</button>
                 </div>
             )}
+
+            {/* Upload error */}
             {uploadState === 'error' && (
                 <div className="upload-toast error" onClick={() => setUploadState('idle')}>
-                    Upload failed. Check S3 settings. Click to dismiss.
+                    Upload failed. Check S3 settings in Options. Click to dismiss.
                 </div>
             )}
 
@@ -384,26 +461,40 @@ const Editor: React.FC = () => {
             {cropRect && (
                 <div className="crop-confirm">
                     <button className="action-btn primary" onClick={applyCrop}>Apply Crop</button>
-                    <button className="action-btn" onClick={() => { setCropRect(null); if (snapshotBeforeDraw.current && getCtx()) getCtx()!.putImageData(snapshotBeforeDraw.current, 0, 0); }}>Cancel</button>
+                    <button className="action-btn" onClick={() => {
+                        setCropRect(null);
+                        if (snapshotBeforeDraw.current) getCtx()?.putImageData(snapshotBeforeDraw.current, 0, 0);
+                    }}>Cancel</button>
                 </div>
             )}
 
             {/* Text input overlay */}
             {textInput.visible && (
-                <input ref={textRef} className="text-overlay-input" value={textValue}
-                    autoFocus
+                <input
+                    ref={textRef}
+                    className="text-overlay-input"
+                    type="text"
+                    value={textValue}
                     onChange={(e) => setTextValue(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') commitText(); if (e.key === 'Escape') setTextInput({ ...textInput, visible: false }); }}
-                    onBlur={() => { setTimeout(commitText, 100); }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); commitText(); }
+                        if (e.key === 'Escape') { textCommittedRef.current = true; setTextInput((prev) => ({ ...prev, visible: false })); }
+                    }}
+                    onBlur={() => { setTimeout(commitText, 80); }}
                     style={{ left: textInput.x, top: textInput.y, color, fontSize: `${Math.max(14, lineWidth * 4)}px` }}
                 />
             )}
 
             <main className="editor-canvas-wrapper">
                 {!imageLoaded && <div className="editor-loading">Loading capture...</div>}
-                <canvas ref={canvasRef} className="editor-canvas"
+                <canvas
+                    ref={canvasRef}
+                    className="editor-canvas"
                     style={{ display: imageLoaded ? 'block' : 'none', cursor: activeTool === 'text' ? 'text' : 'crosshair' }}
-                    onMouseDown={onPointerDown} onMouseMove={onPointerMove} onMouseUp={onPointerUp} onMouseLeave={onPointerUp}
+                    onMouseDown={onPointerDown}
+                    onMouseMove={onPointerMove}
+                    onMouseUp={onPointerUp}
+                    onMouseLeave={onPointerUp}
                 />
             </main>
         </div>

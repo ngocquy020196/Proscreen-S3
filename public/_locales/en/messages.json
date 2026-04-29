@@ -8,6 +8,7 @@
     "captureArea": { "message": "Capture Area" },
     "captureFullpage": { "message": "Capture Full Page" },
     "startRecording": { "message": "Start Recording" },
+    "stopRecording": { "message": "Stop Recording" },
     "microphone": { "message": "Microphone" },
     "webcam": { "message": "Webcam" },
     "recentUploads": { "message": "Recent Uploads" },

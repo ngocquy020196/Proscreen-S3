@@ -8,6 +8,7 @@
     "captureArea": { "message": "Chọn vùng chụp" },
     "captureFullpage": { "message": "Chụp toàn trang" },
     "startRecording": { "message": "Bắt đầu quay" },
+    "stopRecording": { "message": "Dừng quay" },
     "microphone": { "message": "Micro" },
     "webcam": { "message": "Webcam" },
     "recentUploads": { "message": "Tải lên gần đây" },

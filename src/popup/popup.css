@@ -231,6 +231,16 @@ body {
     border-color: var(--danger);
 }
 
+.record-btn--active {
+    background: rgba(248, 81, 73, 0.15);
+    border-color: var(--danger);
+}
+
+.record-btn--active .record-dot {
+    animation: none;
+    opacity: 1;
+}
+
 .record-dot {
     width: 8px;
     height: 8px;

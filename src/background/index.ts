@@ -54,11 +54,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
             break;
 
         case MSG.CAPTURE_FULLPAGE:
-            handleCaptureVisible(); // TODO: implement full page scrolling capture
+            handleCaptureFullPage();
             break;
 
         case MSG.RECORDING_START:
-            handleStartRecording(msg.config);
+            handleStartRecording(msg.config, msg.streamId);
             break;
 
         case MSG.RECORDING_STOP:
@@ -76,6 +76,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         case MSG.OPEN_EDITOR:
             openEditor(msg.dataUrl);
             break;
+
+        case MSG.GET_RECORDING_STATE:
+            sendResponse({ isRecording });
+            return true;
     }
 
     sendResponse({ ok: true });
@@ -119,18 +123,87 @@ function handleAreaCaptureDone(rect: { x: number; y: number; width: number; heig
     });
 }
 
-function cropAndOpenEditor(
+async function cropAndOpenEditor(
     dataUrl: string,
     rect: { x: number; y: number; width: number; height: number }
 ) {
-    // Use offscreen document to crop since service worker has no canvas
-    createOffscreenIfNeeded().then(() => {
-        chrome.runtime.sendMessage({
-            type: 'CROP_IMAGE',
-            dataUrl,
-            rect,
-        });
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    const bitmap = await createImageBitmap(blob);
+
+    const canvas = new OffscreenCanvas(rect.width, rect.height);
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(bitmap, rect.x, rect.y, rect.width, rect.height, 0, 0, rect.width, rect.height);
+
+    const croppedBlob = await canvas.convertToBlob({ type: 'image/png' });
+    const croppedDataUrl = await blobToDataUrl(croppedBlob);
+    openEditor(croppedDataUrl);
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
     });
+}
+
+async function handleCaptureFullPage() {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = tabs[0];
+    if (!tab?.id || !tab?.windowId) return;
+    const tabId = tab.id;
+    const windowId = tab.windowId;
+
+    const info = await chrome.tabs.sendMessage(tabId, { type: MSG.FULLPAGE_GET_INFO }) as {
+        totalHeight: number;
+        totalWidth: number;
+        viewportHeight: number;
+        viewportWidth: number;
+        scrollTop: number;
+    };
+
+    const { totalHeight, viewportHeight, scrollTop: originalScrollTop } = info;
+    const captures: { dataUrl: string; y: number }[] = [];
+    let y = 0;
+
+    while (y < totalHeight) {
+        await chrome.tabs.sendMessage(tabId, { type: MSG.FULLPAGE_SCROLL, y });
+        const dataUrl = await new Promise<string>((resolve) => {
+            chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, resolve);
+        });
+        if (chrome.runtime.lastError || !dataUrl) break;
+        captures.push({ dataUrl, y });
+        y += viewportHeight;
+    }
+
+    chrome.tabs.sendMessage(tabId, { type: MSG.FULLPAGE_DONE, originalScrollTop }).catch(() => {});
+
+    if (captures.length === 0) return;
+
+    // Stitch all captures into one tall image using OffscreenCanvas
+    const firstImg = await fetchBitmap(captures[0].dataUrl);
+    const imgW = firstImg.width;
+    const imgH = firstImg.height;
+    const canvas = new OffscreenCanvas(imgW, totalHeight);
+    const ctx = canvas.getContext('2d')!;
+
+    for (const { dataUrl, y: captureY } of captures) {
+        const bitmap = await fetchBitmap(dataUrl);
+        const remaining = totalHeight - captureY;
+        const drawH = Math.min(imgH, remaining);
+        ctx.drawImage(bitmap, 0, 0, imgW, drawH, 0, captureY, imgW, drawH);
+    }
+
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    const stitchedDataUrl = await blobToDataUrl(blob);
+    openEditor(stitchedDataUrl);
+}
+
+async function fetchBitmap(dataUrl: string): Promise<ImageBitmap> {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    return createImageBitmap(blob);
 }
 
 // ─── Recording Handlers ──────────────────────────────────────────────────────
@@ -145,20 +218,39 @@ function handleToggleRecording() {
     }
 }
 
-async function handleStartRecording(config: Record<string, unknown>) {
+async function handleStartRecording(config: Record<string, unknown> = {}, streamId?: string) {
+    if (streamId) {
+        // streamId already obtained by the popup (extension page)
+        await startRecordingWithStream(config, streamId);
+    } else {
+        // Keyboard shortcut path: background acquires streamId via native picker
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        const tab = tabs[0];
+        if (!tab?.id) return;
+        chrome.desktopCapture.chooseDesktopMedia(
+            ['screen', 'window', 'tab'],
+            tab,
+            async (sid: string) => {
+                if (!sid) return;
+                await startRecordingWithStream(config, sid);
+            }
+        );
+    }
+}
+
+async function startRecordingWithStream(config: Record<string, unknown>, streamId: string) {
     await createOffscreenIfNeeded();
     chrome.runtime.sendMessage({
         type: MSG.RECORDING_START,
-        config,
+        config: { ...config, streamId },
     });
     isRecording = true;
 
-    // Show recording controls on active tab
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]?.id) {
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'RECORDING_SHOW_CONTROLS' }).catch(() => {});
-        }
-    });
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tabId = tabs[0]?.id;
+    if (tabId) {
+        chrome.tabs.sendMessage(tabId, { type: 'RECORDING_SHOW_CONTROLS' }).catch(() => {});
+    }
 }
 
 function handleStopRecording() {
@@ -205,8 +297,8 @@ async function createOffscreenIfNeeded() {
 
     await chrome.offscreen.createDocument({
         url: 'offscreen.html',
-        reasons: [chrome.offscreen.Reason.USER_MEDIA],
-        justification: 'Screen recording requires DOM access for MediaRecorder',
+        reasons: [chrome.offscreen.Reason.DISPLAY_MEDIA],
+        justification: 'Screen recording via getUserMedia with desktop stream ID',
     });
 }
 

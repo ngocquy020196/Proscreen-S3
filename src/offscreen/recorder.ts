@@ -21,17 +21,35 @@ chrome.runtime.onMessage.addListener((msg) => {
         case MSG.RECORDING_RESUME:
             mediaRecorder?.resume();
             break;
-        case 'CROP_IMAGE':
-            cropImage(msg.dataUrl, msg.rect);
-            break;
     }
 });
 
-async function startRecording(config: { audioSource?: string; webcamEnabled?: boolean }) {
+async function startRecording(config: { audioSource?: string; webcamEnabled?: boolean; streamId?: string }) {
     try {
-        const displayStream = await navigator.mediaDevices.getDisplayMedia({
-            video: { frameRate: 30 },
-            audio: config.audioSource === 'system' || config.audioSource === 'both',
+        if (!config.streamId) {
+            throw new Error('No stream ID provided');
+        }
+
+        const needSystemAudio = config.audioSource === 'system' || config.audioSource === 'both';
+
+        // Use the streamId from chrome.desktopCapture.chooseDesktopMedia()
+        const displayStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                // @ts-ignore – Chrome-specific constraint
+                mandatory: {
+                    chromeMediaSource: 'desktop',
+                    chromeMediaSourceId: config.streamId,
+                },
+            },
+            audio: needSystemAudio
+                ? {
+                      // @ts-ignore
+                      mandatory: {
+                          chromeMediaSource: 'desktop',
+                          chromeMediaSourceId: config.streamId,
+                      },
+                  }
+                : false,
         });
 
         let finalStream = displayStream;
@@ -43,19 +61,16 @@ async function startRecording(config: { audioSource?: string; webcamEnabled?: bo
                 const audioCtx = new AudioContext();
                 const dest = audioCtx.createMediaStreamDestination();
 
-                // Add display audio tracks
                 displayStream.getAudioTracks().forEach((track) => {
                     const source = audioCtx.createMediaStreamSource(new MediaStream([track]));
                     source.connect(dest);
                 });
 
-                // Add microphone
                 micStream.getAudioTracks().forEach((track) => {
                     const source = audioCtx.createMediaStreamSource(new MediaStream([track]));
                     source.connect(dest);
                 });
 
-                // Combine video from display + mixed audio
                 finalStream = new MediaStream([
                     ...displayStream.getVideoTracks(),
                     ...dest.stream.getAudioTracks(),
@@ -111,26 +126,3 @@ function stopRecording() {
     }
 }
 
-// ─── Image Cropping ──────────────────────────────────────────────────────────
-
-function cropImage(
-    dataUrl: string,
-    rect: { x: number; y: number; width: number; height: number }
-) {
-    const img = new Image();
-    img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(img, rect.x, rect.y, rect.width, rect.height, 0, 0, rect.width, rect.height);
-
-        const croppedDataUrl = canvas.toDataURL('image/png');
-
-        // Store and open editor
-        chrome.storage.local.set({ _pendingCapture: croppedDataUrl }, () => {
-            chrome.runtime.sendMessage({ type: MSG.OPEN_EDITOR, dataUrl: croppedDataUrl });
-        });
-    };
-    img.src = dataUrl;
-}

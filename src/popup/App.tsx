@@ -12,9 +12,16 @@ const App: React.FC = () => {
     const [recentUploads, setRecentUploads] = useState<UploadHistoryItem[]>([]);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [hideDonate, setHideDonate] = useState(true);
+    const [isRecording, setIsRecording] = useState(false);
 
     useEffect(() => {
         chrome.storage.local.get({ _hideDonate: false }, (r) => setHideDonate(r._hideDonate));
+    }, []);
+
+    useEffect(() => {
+        chrome.runtime.sendMessage({ type: MSG.GET_RECORDING_STATE }, (res) => {
+            if (res?.isRecording) setIsRecording(true);
+        });
     }, []);
 
     useEffect(() => {
@@ -30,6 +37,32 @@ const App: React.FC = () => {
     const handleCapture = (type: string) => {
         chrome.runtime.sendMessage({ type });
         window.close();
+    };
+
+    const handleRecordingClick = () => {
+        if (isRecording) {
+            chrome.runtime.sendMessage({ type: MSG.RECORDING_STOP });
+            window.close();
+            return;
+        }
+        // Popup is an extension page — chooseDesktopMedia works here
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tab = tabs[0];
+            if (!tab) { window.close(); return; }
+            chrome.desktopCapture.chooseDesktopMedia(
+                ['screen', 'window', 'tab'],
+                tab,
+                (streamId: string) => {
+                    if (!streamId) { window.close(); return; }
+                    const config = {
+                        audioSource: settings.recording.audioSource,
+                        webcamEnabled: settings.recording.webcamEnabled,
+                    };
+                    chrome.runtime.sendMessage({ type: MSG.RECORDING_START, config, streamId });
+                    window.close();
+                }
+            );
+        });
     };
 
     const handleCopyLink = async (item: UploadHistoryItem) => {
@@ -130,12 +163,12 @@ const App: React.FC = () => {
                     {t('recording')}
                 </h2>
                 <button
-                    className="record-btn"
-                    onClick={() => handleCapture(MSG.RECORDING_START)}
+                    className={`record-btn${isRecording ? ' record-btn--active' : ''}`}
+                    onClick={handleRecordingClick}
                 >
                     <span className="record-dot" />
-                    {t('startRecording')}
-                    <kbd>Alt+R</kbd>
+                    {isRecording ? t('stopRecording') : t('startRecording')}
+                    {!isRecording && <kbd>Alt+R</kbd>}
                 </button>
                 <div className="recording-options">
                     <label className="option-toggle">

@@ -16,7 +16,7 @@ let recTimerInterval: ReturnType<typeof setInterval> | null = null;
 let recSeconds = 0;
 let recPaused = false;
 
-chrome.runtime.onMessage.addListener((msg) => {
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg.type === MSG.CAPTURE_AREA_START) {
         showOverlay();
     }
@@ -25,6 +25,25 @@ chrome.runtime.onMessage.addListener((msg) => {
     }
     if (msg.type === 'RECORDING_HIDE_CONTROLS') {
         hideRecordingWidget();
+    }
+    if (msg.type === MSG.FULLPAGE_GET_INFO) {
+        sendResponse({
+            totalHeight: document.documentElement.scrollHeight,
+            totalWidth: document.documentElement.scrollWidth,
+            viewportHeight: window.innerHeight,
+            viewportWidth: window.innerWidth,
+            scrollTop: window.scrollY,
+        });
+        return true;
+    }
+    if (msg.type === MSG.FULLPAGE_SCROLL) {
+        window.scrollTo(0, msg.y);
+        // Wait for scroll + any lazy-loaded content
+        setTimeout(() => sendResponse({ done: true }), 150);
+        return true;
+    }
+    if (msg.type === MSG.FULLPAGE_DONE) {
+        window.scrollTo(0, msg.originalScrollTop ?? 0);
     }
 });
 
