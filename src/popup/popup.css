@@ -109,6 +109,23 @@ body {
     margin-top: 1px;
 }
 
+.storage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.storage-badge-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
 .header-settings {
     all: unset;
     cursor: pointer;

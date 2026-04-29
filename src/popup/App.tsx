@@ -5,7 +5,13 @@ import { MSG } from '../constants/messages';
 import { getHistory } from '../lib/history';
 import { copyToClipboard } from '../utils/clipboard';
 import { APP_LINKS } from '../constants/links';
-import type { UploadHistoryItem, AudioSource } from '../types';
+import type { UploadHistoryItem, AudioSource, StorageMode } from '../types';
+
+const STORAGE_META: Record<StorageMode, { label: string; color: string }> = {
+    local:  { label: 'Local only', color: '#6b7280' },
+    custom: { label: 'S3',         color: '#5057B8' },
+    cloud:  { label: 'Cloud',      color: '#0ea5e9' },
+};
 
 const App: React.FC = () => {
     const { settings, loaded, update } = useSettings();
@@ -45,7 +51,6 @@ const App: React.FC = () => {
             window.close();
             return;
         }
-        // Popup is an extension page — chooseDesktopMedia works here
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const tab = tabs[0];
             if (!tab) { window.close(); return; }
@@ -84,6 +89,9 @@ const App: React.FC = () => {
         });
     };
 
+    const { label: storageLabel, color: storageColor } = STORAGE_META[settings.s3.mode];
+    const storageConfigured = settings.s3.mode !== 'custom' || !!settings.s3.endpoint;
+
     return (
         <div className="popup-container">
             {/* Header */}
@@ -99,6 +107,10 @@ const App: React.FC = () => {
                     <div className="header-text">
                         <h1>{t('appName')}</h1>
                         <p>{t('appTagline')}</p>
+                        <span className="storage-badge" style={{ color: storageConfigured ? storageColor : '#f85149' }}>
+                            <span className="storage-badge-dot" style={{ background: storageConfigured ? storageColor : '#f85149' }} />
+                            {storageConfigured ? storageLabel : `${storageLabel} — not set`}
+                        </span>
                     </div>
                 </div>
                 <button className="header-settings" onClick={() => chrome.runtime.openOptionsPage()} title={t('settings')}>

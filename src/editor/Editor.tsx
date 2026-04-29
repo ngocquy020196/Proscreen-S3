@@ -60,6 +60,7 @@ const Editor: React.FC = () => {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadUrl, setUploadUrl] = useState('');
     const [urlCopied, setUrlCopied] = useState(false);
+    const [storageMode, setStorageMode] = useState<'local' | 'upload'>('local');
 
     // Text input — canvasX/Y captured at click time to avoid scroll-drift in commitText
     const [textInput, setTextInput] = useState<{ x: number; y: number; canvasX: number; canvasY: number; visible: boolean }>({ x: 0, y: 0, canvasX: 0, canvasY: 0, visible: false });
@@ -71,6 +72,12 @@ const Editor: React.FC = () => {
     const [cropRect, setCropRect] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
 
     // ─── Load Image ──────────────────────────────────────────────────────────
+
+    useEffect(() => {
+        getSettings().then((s) => {
+            setStorageMode(s.s3.mode === 'custom' && !!s.s3.endpoint ? 'upload' : 'local');
+        });
+    }, []);
 
     useEffect(() => {
         document.documentElement.dataset.theme = 'dark';
@@ -357,7 +364,9 @@ const Editor: React.FC = () => {
         let settings: Settings;
         try { settings = await getSettings(); } catch { handleDownload(); return; }
 
-        if (settings.s3.mode !== 'custom' || !settings.s3.endpoint) {
+        const canUpload = settings.s3.mode === 'custom' && !!settings.s3.endpoint;
+
+        if (!canUpload) {
             handleDownload();
             return;
         }
@@ -422,7 +431,8 @@ const Editor: React.FC = () => {
                 <div className="toolbar-actions">
                     <button className="action-btn" onClick={handleDownload}>{I.download}<span>Download</span></button>
                     <button className="action-btn primary" onClick={handleSaveUpload} disabled={uploadState === 'uploading'}>
-                        {I.upload}<span>{uploadState === 'uploading' ? `${uploadProgress}%` : 'Save & Upload'}</span>
+                        {storageMode === 'upload' ? I.upload : I.download}
+                        <span>{uploadState === 'uploading' ? `${uploadProgress}%` : storageMode === 'upload' ? 'Save & Upload' : 'Save'}</span>
                     </button>
                 </div>
             </header>

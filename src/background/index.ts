@@ -40,6 +40,16 @@ chrome.commands.onCommand.addListener((command) => {
 // ─── Message Routing ─────────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (msg.type === MSG.CAPTURE_FULLPAGE) {
+        handleCaptureFullPage().then(() => sendResponse({ ok: true })).catch(() => sendResponse({ ok: false }));
+        return true; // keep message channel open while async work runs
+    }
+
+    if (msg.type === MSG.GET_RECORDING_STATE) {
+        sendResponse({ isRecording });
+        return true;
+    }
+
     switch (msg.type) {
         case MSG.CAPTURE_VISIBLE:
             handleCaptureVisible();
@@ -51,10 +61,6 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
         case MSG.CAPTURE_AREA_DONE:
             handleAreaCaptureDone(msg.rect);
-            break;
-
-        case MSG.CAPTURE_FULLPAGE:
-            handleCaptureFullPage();
             break;
 
         case MSG.RECORDING_START:
@@ -76,10 +82,6 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         case MSG.OPEN_EDITOR:
             openEditor(msg.dataUrl);
             break;
-
-        case MSG.GET_RECORDING_STATE:
-            sendResponse({ isRecording });
-            return true;
     }
 
     sendResponse({ ok: true });
@@ -297,7 +299,7 @@ async function createOffscreenIfNeeded() {
 
     await chrome.offscreen.createDocument({
         url: 'offscreen.html',
-        reasons: [chrome.offscreen.Reason.DISPLAY_MEDIA],
+        reasons: [chrome.offscreen.Reason.USER_MEDIA],
         justification: 'Screen recording via getUserMedia with desktop stream ID',
     });
 }
