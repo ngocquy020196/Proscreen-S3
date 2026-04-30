@@ -4,11 +4,11 @@
  * Copies dist/ → dist-firefox/ and transforms manifest.json for Firefox MV3.
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const DIST = path.resolve(__dirname, '..', 'dist');
-const DIST_FF = path.resolve(__dirname, '..', 'dist-firefox');
+const DIST = path.resolve(process.cwd(), 'dist');
+const DIST_FF = path.resolve(process.cwd(), 'dist-firefox');
 const GECKO_ID = 'proscreen-s3@ngocquy';
 
 function copyDir(src, dest) {
