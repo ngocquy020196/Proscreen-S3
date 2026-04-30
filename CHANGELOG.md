@@ -2,7 +2,7 @@
 
 All notable changes to ProScreen will be documented in this file.
 
-## v0.1.0 - 2026-04-30
+## v0.0.1 - 2026-04-30
 
 ### Added
 - Video preview page (`video.html`) with direct download and S3 upload

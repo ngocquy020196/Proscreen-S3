@@ -11,12 +11,15 @@
 ## Key Features
 
 - **Screenshot** — Capture visible tab, select area, or full page
-- **Screen Recording** — Record screen with system/mic audio, pause/resume
+- **Screen Recording** — Record screen with system/mic audio, pause/resume, timer badge
+- **Video Preview** — Dedicated player page to review videos before saving/uploading
 - **Annotation Editor** — Draw, arrow, rectangle, text, blur, crop with undo/redo
 - **S3 Upload** — Upload directly to AWS S3, Cloudflare R2, MinIO, or any S3-compatible storage
+- **Optimized Storage** — Uses IndexedDB to store raw binary video blobs (no memory limits)
 - **Privacy-first** — Your keys stay in your browser. No server. No tracking.
 - **Upload History** — Keep track of your uploads with an optimized local history
 - **Manifest V3** — Built with the latest Chrome, Edge & Firefox extension standard
+- **Automated CI/CD** — Fully automated GitHub Actions pipeline for releases
 
 ## How It Works
 
@@ -39,9 +42,10 @@
 | **React 19** | Popup, Options & Editor UI |
 | **TypeScript** | Type-safe codebase |
 | **Manifest V3** | Chrome, Edge & Firefox extension platform |
-| **AWS Signature V4** | Zero-dependency, Web Crypto API for secure S3 uploads |
+| **Web Crypto API** | AWS Signature V4 for secure S3 uploads |
+| **Offscreen Document** | Manifest V3 standard `getDisplayMedia` screen recording |
+| **IndexedDB** | Optimized raw binary video blob storage |
 | **Canvas 2D** | Lightweight annotation system |
-| **MediaRecorder** | Native screen recording |
 
 ## Project Structure
 
