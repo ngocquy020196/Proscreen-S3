@@ -1,6 +1,6 @@
 # Privacy Policy — ProScreen
 
-**Last updated:** April 29, 2026
+**Last updated:** April 30, 2026
 
 ## Overview
 
@@ -20,13 +20,14 @@ Specifically:
 
 ## Data Storage
 
-All data is stored locally in your browser using `chrome.storage`:
+All data is stored locally in your browser using `chrome.storage` and `IndexedDB`:
 
 | Data | Storage | Purpose |
 |---|---|---|
 | S3 credentials | `chrome.storage.local` | Connect to your own storage |
 | Settings | `chrome.storage.sync` | User preferences |
 | Upload history | `chrome.storage.local` | Recent upload links |
+| Video files | `IndexedDB` | Temporary storage for video before upload/download |
 
 **Your S3 keys never leave your browser.** They are only used to sign upload requests directly from the extension to your storage endpoint.
 
@@ -38,7 +39,7 @@ All data is stored locally in your browser using `chrome.storage`:
 | `tabs` | Capture visible tab |
 | `activeTab` | Access current page for area selection |
 | `contextMenus` | Right-click capture menu |
-| `offscreen` | Screen recording (MediaRecorder) |
+| `offscreen` | Screen recording (`getDisplayMedia` API) |
 | `desktopCapture` | Screen recording source selection |
 | `downloads` | Save recorded videos |
 | `host_permissions: <all_urls>` | Upload to user's S3 endpoint (any domain) |
