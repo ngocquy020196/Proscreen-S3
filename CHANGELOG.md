@@ -2,13 +2,18 @@
 
 All notable changes to ProScreen will be documented in this file.
 
-## [0.1.0] - 2026-04-29
+## v0.1.0 - 2026-04-30
 
 ### Added
+- Video preview page (`video.html`) with direct download and S3 upload
+- IndexedDB storage for efficient raw binary video blob handling (no memory limits)
+- Screen recording timer badge on extension icon (MM:SS)
+- New premium transparent icon suite (16px to 128px)
+- Automated CI/CD pipeline via GitHub Actions (auto zip, artifact, and release)
 - Screenshot: Capture visible tab, area selection, full page
 - Annotation Editor: Pen, arrow, rectangle, text, blur, crop tools
 - Undo/Redo with snapshot history (max 50 steps)
-- Screen Recording with MediaRecorder (WebM/VP9)
+- Screen Recording via Manifest V3 standard `getDisplayMedia` (Offscreen Document)
 - Recording controls widget: timer, pause/resume, stop (draggable)
 - S3 Upload: AWS Signature V4, zero dependencies
 - Upload progress bar with auto-copy link
@@ -20,4 +25,3 @@ All notable changes to ProScreen will be documented in this file.
 - Keyboard shortcuts: Alt+S, Alt+A, Alt+R
 - Context menu integration
 - Firefox compatibility via build script
-- Privacy Policy
