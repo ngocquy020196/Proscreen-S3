@@ -1,52 +1,152 @@
 {
-    "appName": { "message": "ProScreen" },
-    "appDesc": { "message": "Chụp ảnh màn hình, quay video, chú thích và tải lên S3. Mã nguồn mở & bảo mật." },
-    "appTagline": { "message": "Chụp · Quay · Tải lên" },
-    "screenshot": { "message": "Chụp ảnh" },
-    "recording": { "message": "Quay màn hình" },
-    "captureVisible": { "message": "Chụp tab hiện tại" },
-    "captureArea": { "message": "Chọn vùng chụp" },
-    "captureFullpage": { "message": "Chụp toàn trang" },
-    "startRecording": { "message": "Bắt đầu quay" },
-    "stopRecording": { "message": "Dừng quay" },
-    "microphone": { "message": "Micro" },
-    "webcam": { "message": "Webcam" },
-    "recentUploads": { "message": "Tải lên gần đây" },
-    "settings": { "message": "Cài đặt" },
-    "copyLink": { "message": "Sao chép link" },
-    "s3Settings": { "message": "Lưu trữ S3" },
-    "uploadHistory": { "message": "Lịch sử tải lên" },
-    "recordingSettings": { "message": "Quay màn hình" },
-    "general": { "message": "Chung" },
-    "storageMode": { "message": "Chế độ lưu trữ" },
-    "localOnly": { "message": "Chỉ cục bộ" },
-    "customS3": { "message": "S3 tùy chỉnh" },
-    "cloudManaged": { "message": "Cloud (Quản lý)" },
-    "endpoint": { "message": "Endpoint URL" },
-    "bucket": { "message": "Tên Bucket" },
-    "accessKey": { "message": "Access Key ID" },
-    "secretKey": { "message": "Secret Access Key" },
-    "region": { "message": "Vùng" },
-    "pathPrefix": { "message": "Tiền tố đường dẫn" },
-    "publicUrl": { "message": "URL công khai" },
-    "testConnection": { "message": "Kiểm tra kết nối" },
-    "connectionSuccess": { "message": "Kết nối thành công" },
-    "connectionFailed": { "message": "Kết nối thất bại" },
-    "noUploads": { "message": "Chưa có tải lên nào." },
-    "theme": { "message": "Giao diện" },
-    "dark": { "message": "Tối" },
-    "light": { "message": "Sáng" },
-    "imageFormat": { "message": "Định dạng ảnh" },
-    "imageQuality": { "message": "Chất lượng ảnh" },
-    "autoCopyLink": { "message": "Tự động sao chép link sau khi tải" },
-    "showNotification": { "message": "Hiện thông báo khi tải xong" },
-    "videoQuality": { "message": "Chất lượng video" },
-    "audioSource": { "message": "Nguồn âm thanh" },
-    "noAudio": { "message": "Không" },
-    "systemAudio": { "message": "Hệ thống" },
-    "bothAudio": { "message": "Cả hai" },
-    "low": { "message": "Thấp" },
-    "medium": { "message": "Trung bình" },
-    "high": { "message": "Cao" },
-    "authorName": { "message": "ngocquy.dev" }
+    "appName": {
+        "message": "ProScreen S3: Screenshots, record and upload to your own S3 storage"
+    },
+    "appDesc": {
+        "message": "Chụp ảnh màn hình, quay video, chú thích và tải lên S3. Mã nguồn mở & bảo mật."
+    },
+    "appTagline": {
+        "message": "Chụp · Quay · Tải lên"
+    },
+    "screenshot": {
+        "message": "Chụp ảnh"
+    },
+    "recording": {
+        "message": "Quay màn hình"
+    },
+    "captureVisible": {
+        "message": "Chụp tab hiện tại"
+    },
+    "captureArea": {
+        "message": "Chọn vùng chụp"
+    },
+    "captureFullpage": {
+        "message": "Chụp toàn trang"
+    },
+    "startRecording": {
+        "message": "Bắt đầu quay"
+    },
+    "stopRecording": {
+        "message": "Dừng quay"
+    },
+    "microphone": {
+        "message": "Micro"
+    },
+    "webcam": {
+        "message": "Webcam"
+    },
+    "recentUploads": {
+        "message": "Tải lên gần đây"
+    },
+    "settings": {
+        "message": "Cài đặt"
+    },
+    "copyLink": {
+        "message": "Sao chép link"
+    },
+    "s3Settings": {
+        "message": "Lưu trữ S3"
+    },
+    "uploadHistory": {
+        "message": "Lịch sử tải lên"
+    },
+    "recordingSettings": {
+        "message": "Quay màn hình"
+    },
+    "general": {
+        "message": "Chung"
+    },
+    "storageMode": {
+        "message": "Chế độ lưu trữ"
+    },
+    "localOnly": {
+        "message": "Chỉ cục bộ"
+    },
+    "customS3": {
+        "message": "S3 tùy chỉnh"
+    },
+    "cloudManaged": {
+        "message": "Cloud (Quản lý)"
+    },
+    "endpoint": {
+        "message": "Endpoint URL"
+    },
+    "bucket": {
+        "message": "Tên Bucket"
+    },
+    "accessKey": {
+        "message": "Access Key ID"
+    },
+    "secretKey": {
+        "message": "Secret Access Key"
+    },
+    "region": {
+        "message": "Vùng"
+    },
+    "pathPrefix": {
+        "message": "Tiền tố đường dẫn"
+    },
+    "publicUrl": {
+        "message": "URL công khai"
+    },
+    "testConnection": {
+        "message": "Kiểm tra kết nối"
+    },
+    "connectionSuccess": {
+        "message": "Kết nối thành công"
+    },
+    "connectionFailed": {
+        "message": "Kết nối thất bại"
+    },
+    "noUploads": {
+        "message": "Chưa có tải lên nào."
+    },
+    "theme": {
+        "message": "Giao diện"
+    },
+    "dark": {
+        "message": "Tối"
+    },
+    "light": {
+        "message": "Sáng"
+    },
+    "imageFormat": {
+        "message": "Định dạng ảnh"
+    },
+    "imageQuality": {
+        "message": "Chất lượng ảnh"
+    },
+    "autoCopyLink": {
+        "message": "Tự động sao chép link sau khi tải"
+    },
+    "showNotification": {
+        "message": "Hiện thông báo khi tải xong"
+    },
+    "videoQuality": {
+        "message": "Chất lượng video"
+    },
+    "audioSource": {
+        "message": "Nguồn âm thanh"
+    },
+    "noAudio": {
+        "message": "Không"
+    },
+    "systemAudio": {
+        "message": "Hệ thống"
+    },
+    "bothAudio": {
+        "message": "Cả hai"
+    },
+    "low": {
+        "message": "Thấp"
+    },
+    "medium": {
+        "message": "Trung bình"
+    },
+    "high": {
+        "message": "Cao"
+    },
+    "authorName": {
+        "message": "ngocquy.dev"
+    }
 }

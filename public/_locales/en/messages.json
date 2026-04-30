@@ -1,52 +1,152 @@
 {
-    "appName": { "message": "ProScreen" },
-    "appDesc": { "message": "Capture screenshots, record screen, annotate, and upload to your own S3 storage. Open source & privacy-first." },
-    "appTagline": { "message": "Screenshot · Record · Upload" },
-    "screenshot": { "message": "Screenshot" },
-    "recording": { "message": "Recording" },
-    "captureVisible": { "message": "Capture Visible Tab" },
-    "captureArea": { "message": "Capture Area" },
-    "captureFullpage": { "message": "Capture Full Page" },
-    "startRecording": { "message": "Start Recording" },
-    "stopRecording": { "message": "Stop Recording" },
-    "microphone": { "message": "Microphone" },
-    "webcam": { "message": "Webcam" },
-    "recentUploads": { "message": "Recent Uploads" },
-    "settings": { "message": "Settings" },
-    "copyLink": { "message": "Copy Link" },
-    "s3Settings": { "message": "S3 Storage" },
-    "uploadHistory": { "message": "Upload History" },
-    "recordingSettings": { "message": "Recording" },
-    "general": { "message": "General" },
-    "storageMode": { "message": "Storage Mode" },
-    "localOnly": { "message": "Local Only" },
-    "customS3": { "message": "Custom S3" },
-    "cloudManaged": { "message": "Cloud (Managed)" },
-    "endpoint": { "message": "Endpoint URL" },
-    "bucket": { "message": "Bucket Name" },
-    "accessKey": { "message": "Access Key ID" },
-    "secretKey": { "message": "Secret Access Key" },
-    "region": { "message": "Region" },
-    "pathPrefix": { "message": "Path Prefix" },
-    "publicUrl": { "message": "Public URL" },
-    "testConnection": { "message": "Test Connection" },
-    "connectionSuccess": { "message": "Connected" },
-    "connectionFailed": { "message": "Failed" },
-    "noUploads": { "message": "No uploads yet." },
-    "theme": { "message": "Theme" },
-    "dark": { "message": "Dark" },
-    "light": { "message": "Light" },
-    "imageFormat": { "message": "Image Format" },
-    "imageQuality": { "message": "Image Quality" },
-    "autoCopyLink": { "message": "Auto-copy link after upload" },
-    "showNotification": { "message": "Show upload notifications" },
-    "videoQuality": { "message": "Video Quality" },
-    "audioSource": { "message": "Audio Source" },
-    "noAudio": { "message": "None" },
-    "systemAudio": { "message": "System" },
-    "bothAudio": { "message": "Both" },
-    "low": { "message": "Low" },
-    "medium": { "message": "Medium" },
-    "high": { "message": "High" },
-    "authorName": { "message": "ngocquy.dev" }
+    "appName": {
+        "message": "ProScreen S3: Screenshots, record and upload to your own S3 storage"
+    },
+    "appDesc": {
+        "message": "Capture screenshots, record screen, annotate, and upload to your own S3 storage. Open source & privacy-first."
+    },
+    "appTagline": {
+        "message": "Screenshot · Record · Upload"
+    },
+    "screenshot": {
+        "message": "Screenshot"
+    },
+    "recording": {
+        "message": "Recording"
+    },
+    "captureVisible": {
+        "message": "Capture Visible Tab"
+    },
+    "captureArea": {
+        "message": "Capture Area"
+    },
+    "captureFullpage": {
+        "message": "Capture Full Page"
+    },
+    "startRecording": {
+        "message": "Start Recording"
+    },
+    "stopRecording": {
+        "message": "Stop Recording"
+    },
+    "microphone": {
+        "message": "Microphone"
+    },
+    "webcam": {
+        "message": "Webcam"
+    },
+    "recentUploads": {
+        "message": "Recent Uploads"
+    },
+    "settings": {
+        "message": "Settings"
+    },
+    "copyLink": {
+        "message": "Copy Link"
+    },
+    "s3Settings": {
+        "message": "S3 Storage"
+    },
+    "uploadHistory": {
+        "message": "Upload History"
+    },
+    "recordingSettings": {
+        "message": "Recording"
+    },
+    "general": {
+        "message": "General"
+    },
+    "storageMode": {
+        "message": "Storage Mode"
+    },
+    "localOnly": {
+        "message": "Local Only"
+    },
+    "customS3": {
+        "message": "Custom S3"
+    },
+    "cloudManaged": {
+        "message": "Cloud (Managed)"
+    },
+    "endpoint": {
+        "message": "Endpoint URL"
+    },
+    "bucket": {
+        "message": "Bucket Name"
+    },
+    "accessKey": {
+        "message": "Access Key ID"
+    },
+    "secretKey": {
+        "message": "Secret Access Key"
+    },
+    "region": {
+        "message": "Region"
+    },
+    "pathPrefix": {
+        "message": "Path Prefix"
+    },
+    "publicUrl": {
+        "message": "Public URL"
+    },
+    "testConnection": {
+        "message": "Test Connection"
+    },
+    "connectionSuccess": {
+        "message": "Connected"
+    },
+    "connectionFailed": {
+        "message": "Failed"
+    },
+    "noUploads": {
+        "message": "No uploads yet."
+    },
+    "theme": {
+        "message": "Theme"
+    },
+    "dark": {
+        "message": "Dark"
+    },
+    "light": {
+        "message": "Light"
+    },
+    "imageFormat": {
+        "message": "Image Format"
+    },
+    "imageQuality": {
+        "message": "Image Quality"
+    },
+    "autoCopyLink": {
+        "message": "Auto-copy link after upload"
+    },
+    "showNotification": {
+        "message": "Show upload notifications"
+    },
+    "videoQuality": {
+        "message": "Video Quality"
+    },
+    "audioSource": {
+        "message": "Audio Source"
+    },
+    "noAudio": {
+        "message": "None"
+    },
+    "systemAudio": {
+        "message": "System"
+    },
+    "bothAudio": {
+        "message": "Both"
+    },
+    "low": {
+        "message": "Low"
+    },
+    "medium": {
+        "message": "Medium"
+    },
+    "high": {
+        "message": "High"
+    },
+    "authorName": {
+        "message": "ngocquy.dev"
+    }
 }
