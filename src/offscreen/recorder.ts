@@ -3,13 +3,14 @@
 // This runs in an offscreen document because Service Workers lack DOM access.
 
 import { MSG } from '../constants/messages';
+import { saveVideoBlob } from '../lib/video-store';
 
 let mediaRecorder: MediaRecorder | null = null;
 let recordedChunks: Blob[] = [];
 
 chrome.runtime.onMessage.addListener((msg) => {
     switch (msg.type) {
-        case MSG.RECORDING_START:
+        case MSG.OFFSCREEN_START_RECORDING:
             startRecording(msg.config);
             break;
         case MSG.RECORDING_STOP:
@@ -24,32 +25,12 @@ chrome.runtime.onMessage.addListener((msg) => {
     }
 });
 
-async function startRecording(config: { audioSource?: string; webcamEnabled?: boolean; streamId?: string }) {
+async function startRecording(config: { audioSource?: string; webcamEnabled?: boolean }) {
     try {
-        if (!config.streamId) {
-            throw new Error('No stream ID provided');
-        }
-
-        const needSystemAudio = config.audioSource === 'system' || config.audioSource === 'both';
-
-        // Use the streamId from chrome.desktopCapture.chooseDesktopMedia()
-        const displayStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                // @ts-ignore – Chrome-specific constraint
-                mandatory: {
-                    chromeMediaSource: 'desktop',
-                    chromeMediaSourceId: config.streamId,
-                },
-            },
-            audio: needSystemAudio
-                ? {
-                      // @ts-ignore
-                      mandatory: {
-                          chromeMediaSource: 'desktop',
-                          chromeMediaSourceId: config.streamId,
-                      },
-                  }
-                : false,
+        // Use getDisplayMedia — Chrome shows native picker automatically
+        const displayStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: config.audioSource === 'system' || config.audioSource === 'both',
         });
 
         let finalStream = displayStream;
@@ -91,16 +72,12 @@ async function startRecording(config: { audioSource?: string; webcamEnabled?: bo
             }
         };
 
-        mediaRecorder.onstop = () => {
+        mediaRecorder.onstop = async () => {
             const blob = new Blob(recordedChunks, { type: 'video/webm' });
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                chrome.runtime.sendMessage({
-                    type: MSG.RECORDING_DATA,
-                    dataUrl: reader.result,
-                });
-            };
-            reader.readAsDataURL(blob);
+
+            // Save blob directly to IndexedDB (no base64 conversion)
+            await saveVideoBlob(blob);
+            chrome.runtime.sendMessage({ type: MSG.RECORDING_DATA });
 
             // Cleanup
             finalStream.getTracks().forEach((t) => t.stop());
@@ -113,6 +90,7 @@ async function startRecording(config: { audioSource?: string; webcamEnabled?: bo
             state: 'recording',
         });
     } catch (err) {
+        console.error('[ProScreen] Recording error:', err);
         chrome.runtime.sendMessage({
             type: MSG.UPLOAD_ERROR,
             error: (err as Error).message,
@@ -125,4 +103,3 @@ function stopRecording() {
         mediaRecorder.stop();
     }
 }
-

@@ -63,8 +63,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
             handleAreaCaptureDone(msg.rect);
             break;
 
+        case MSG.CAPTURE_AREA_CANCEL:
+            currentFrozenAreaCapture = null;
+            break;
+
         case MSG.RECORDING_START:
-            handleStartRecording(msg.config, msg.streamId);
+            handleStartRecording(msg.config);
             break;
 
         case MSG.RECORDING_STOP:
@@ -72,11 +76,14 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
             break;
 
         case MSG.RECORDING_DATA:
-            handleRecordingData(msg.dataUrl);
+            handleRecordingData();
             break;
 
         case MSG.RECORDING_STATUS:
-            if (msg.state === 'recording') isRecording = true;
+            if (msg.state === 'recording') {
+                isRecording = true;
+                startRecordingTimer();
+            }
             break;
 
         case MSG.OPEN_EDITOR:
@@ -104,25 +111,45 @@ function handleCaptureVisible() {
     });
 }
 
+let currentFrozenAreaCapture: string | null = null;
+
 function handleCaptureArea() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (!tabs[0]?.id) return;
-        chrome.tabs.sendMessage(tabs[0].id, { type: MSG.CAPTURE_AREA_START }).catch(() => {});
+        const tab = tabs[0];
+        if (!tab?.id || !tab?.windowId) return;
+
+        chrome.tabs.captureVisibleTab(
+            tab.windowId,
+            { format: 'png' },
+            (dataUrl) => {
+                if (chrome.runtime.lastError || !dataUrl) return;
+                currentFrozenAreaCapture = dataUrl;
+                chrome.tabs.sendMessage(tab.id!, {
+                    type: MSG.CAPTURE_AREA_START,
+                    dataUrl
+                }).catch(() => { });
+            }
+        );
     });
 }
 
 function handleAreaCaptureDone(rect: { x: number; y: number; width: number; height: number }) {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (!tabs[0]?.windowId) return;
-        chrome.tabs.captureVisibleTab(
-            tabs[0].windowId,
-            { format: 'png' },
-            (dataUrl) => {
-                if (chrome.runtime.lastError || !dataUrl) return;
-                cropAndOpenEditor(dataUrl, rect);
-            }
-        );
-    });
+    if (currentFrozenAreaCapture) {
+        cropAndOpenEditor(currentFrozenAreaCapture, rect);
+        currentFrozenAreaCapture = null;
+    } else {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (!tabs[0]?.windowId) return;
+            chrome.tabs.captureVisibleTab(
+                tabs[0].windowId,
+                { format: 'png' },
+                (dataUrl) => {
+                    if (chrome.runtime.lastError || !dataUrl) return;
+                    cropAndOpenEditor(dataUrl, rect);
+                }
+            );
+        });
+    }
 }
 
 async function cropAndOpenEditor(
@@ -179,7 +206,7 @@ async function handleCaptureFullPage() {
         y += viewportHeight;
     }
 
-    chrome.tabs.sendMessage(tabId, { type: MSG.FULLPAGE_DONE, originalScrollTop }).catch(() => {});
+    chrome.tabs.sendMessage(tabId, { type: MSG.FULLPAGE_DONE, originalScrollTop }).catch(() => { });
 
     if (captures.length === 0) return;
 
@@ -211,6 +238,27 @@ async function fetchBitmap(dataUrl: string): Promise<ImageBitmap> {
 // ─── Recording Handlers ──────────────────────────────────────────────────────
 
 let isRecording = false;
+let recordingTimer: ReturnType<typeof setInterval> | null = null;
+let recordingStartTime = 0;
+
+function startRecordingTimer() {
+    recordingStartTime = Date.now();
+    chrome.action.setBadgeBackgroundColor({ color: '#e53935' });
+    updateBadge();
+    recordingTimer = setInterval(updateBadge, 1000);
+}
+
+function stopRecordingTimer() {
+    if (recordingTimer) { clearInterval(recordingTimer); recordingTimer = null; }
+    chrome.action.setBadgeText({ text: '' });
+}
+
+function updateBadge() {
+    const sec = Math.floor((Date.now() - recordingStartTime) / 1000);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    chrome.action.setBadgeText({ text: `${m}:${String(s).padStart(2, '0')}` });
+}
 
 function handleToggleRecording() {
     if (isRecording) {
@@ -220,39 +268,19 @@ function handleToggleRecording() {
     }
 }
 
-async function handleStartRecording(config: Record<string, unknown> = {}, streamId?: string) {
-    if (streamId) {
-        // streamId already obtained by the popup (extension page)
-        await startRecordingWithStream(config, streamId);
-    } else {
-        // Keyboard shortcut path: background acquires streamId via native picker
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        const tab = tabs[0];
-        if (!tab?.id) return;
-        chrome.desktopCapture.chooseDesktopMedia(
-            ['screen', 'window', 'tab'],
-            tab,
-            async (sid: string) => {
-                if (!sid) return;
-                await startRecordingWithStream(config, sid);
-            }
-        );
-    }
-}
+async function handleStartRecording(config: Record<string, unknown> = {}) {
+    if (isRecording) return;
 
-async function startRecordingWithStream(config: Record<string, unknown>, streamId: string) {
     await createOffscreenIfNeeded();
+    // Give offscreen document time to load scripts and register listeners
+    await new Promise((r) => setTimeout(r, 300));
+
+    // Tell offscreen to start — it will call getDisplayMedia which shows the picker
     chrome.runtime.sendMessage({
-        type: MSG.RECORDING_START,
-        config: { ...config, streamId },
+        type: MSG.OFFSCREEN_START_RECORDING,
+        config,
     });
     isRecording = true;
-
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    const tabId = tabs[0]?.id;
-    if (tabId) {
-        chrome.tabs.sendMessage(tabId, { type: 'RECORDING_SHOW_CONTROLS' }).catch(() => {});
-    }
 }
 
 function handleStopRecording() {
@@ -260,31 +288,30 @@ function handleStopRecording() {
         type: MSG.RECORDING_STOP,
     });
     isRecording = false;
+    stopRecordingTimer();
 
     // Hide recording controls on active tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]?.id) {
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'RECORDING_HIDE_CONTROLS' }).catch(() => {});
+            chrome.tabs.sendMessage(tabs[0].id, { type: 'RECORDING_HIDE_CONTROLS' }).catch(() => { });
         }
     });
 }
 
-function handleRecordingData(dataUrl: string) {
-    const now = new Date();
-    const time = now.toTimeString().slice(0, 8).replace(/:/g, '-');
-    const filename = `proscreen-recording-${time}.webm`;
+function handleRecordingData() {
+    isRecording = false;
+    stopRecordingTimer();
 
-    chrome.downloads.download({
-        url: dataUrl,
-        filename,
-        saveAs: true,
-    });
-
-    // Also hide controls (in case stop came from offscreen)
+    // Hide controls
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]?.id) {
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'RECORDING_HIDE_CONTROLS' }).catch(() => {});
+            chrome.tabs.sendMessage(tabs[0].id, { type: 'RECORDING_HIDE_CONTROLS' }).catch(() => { });
         }
+    });
+
+    // Video data is already in chrome.storage.local._pendingVideo (saved by offscreen)
+    chrome.tabs.create({
+        url: chrome.runtime.getURL('video.html'),
     });
 }
 
@@ -299,8 +326,8 @@ async function createOffscreenIfNeeded() {
 
     await chrome.offscreen.createDocument({
         url: 'offscreen.html',
-        reasons: [chrome.offscreen.Reason.USER_MEDIA],
-        justification: 'Screen recording via getUserMedia with desktop stream ID',
+        reasons: [chrome.offscreen.Reason.DISPLAY_MEDIA],
+        justification: 'Screen recording via getDisplayMedia',
     });
 }
 

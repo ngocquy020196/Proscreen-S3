@@ -1,8 +1,11 @@
 import { defineConfig, type PluginOption } from 'vite';
+import type { LibraryFormats, UserConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
 import { copyFileSync, existsSync } from 'fs';
+
+const IIFE: LibraryFormats[] = ['iife'];
 
 function copyContentCss(): PluginOption {
     return {
@@ -17,7 +20,7 @@ function copyContentCss(): PluginOption {
     };
 }
 
-export default defineConfig(() => {
+export default defineConfig((_env): UserConfig => {
     const buildTarget = process.env.BUILD_TARGET;
 
     // Background service worker build
@@ -30,7 +33,7 @@ export default defineConfig(() => {
                 lib: {
                     entry: resolve(__dirname, 'src/background/index.ts'),
                     name: 'Background',
-                    formats: ['iife'],
+                    formats: IIFE,
                     fileName: () => 'background.js',
                 },
             },
@@ -49,7 +52,7 @@ export default defineConfig(() => {
                 lib: {
                     entry: resolve(__dirname, 'src/content/capture-overlay.ts'),
                     name: 'ProScreenContent',
-                    formats: ['iife'],
+                    formats: IIFE,
                     fileName: () => 'content.js',
                 },
                 rollupOptions: {
@@ -61,7 +64,7 @@ export default defineConfig(() => {
         };
     }
 
-    // Editor page build
+    // Editor + Video page build
     if (buildTarget === 'editor') {
         return {
             plugins: [react(), tailwindcss()],
@@ -72,11 +75,12 @@ export default defineConfig(() => {
                 rollupOptions: {
                     input: {
                         editor: resolve(__dirname, 'editor.html'),
+                        video: resolve(__dirname, 'video.html'),
                     },
                     output: {
-                        entryFileNames: 'editor.js',
-                        chunkFileNames: 'editor-[name].js',
-                        assetFileNames: 'assets/editor-[name][extname]',
+                        entryFileNames: '[name].js',
+                        chunkFileNames: '[name]-[hash].js',
+                        assetFileNames: 'assets/[name]-[hash][extname]',
                     },
                 },
             },
@@ -93,7 +97,7 @@ export default defineConfig(() => {
                 lib: {
                     entry: resolve(__dirname, 'src/offscreen/recorder.ts'),
                     name: 'OffscreenRecorder',
-                    formats: ['iife'],
+                    formats: IIFE,
                     fileName: () => 'offscreen.js',
                 },
             },

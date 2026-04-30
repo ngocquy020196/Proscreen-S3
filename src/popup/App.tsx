@@ -8,9 +8,9 @@ import { APP_LINKS } from '../constants/links';
 import type { UploadHistoryItem, AudioSource, StorageMode } from '../types';
 
 const STORAGE_META: Record<StorageMode, { label: string; color: string }> = {
-    local:  { label: 'Local only', color: '#6b7280' },
-    custom: { label: 'S3',         color: '#5057B8' },
-    cloud:  { label: 'Cloud',      color: '#0ea5e9' },
+    local: { label: 'Local only', color: '#6b7280' },
+    custom: { label: 'S3', color: '#5057B8' },
+    cloud: { label: 'Cloud', color: '#0ea5e9' },
 };
 
 const App: React.FC = () => {
@@ -51,23 +51,9 @@ const App: React.FC = () => {
             window.close();
             return;
         }
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            const tab = tabs[0];
-            if (!tab) { window.close(); return; }
-            chrome.desktopCapture.chooseDesktopMedia(
-                ['screen', 'window', 'tab'],
-                tab,
-                (streamId: string) => {
-                    if (!streamId) { window.close(); return; }
-                    const config = {
-                        audioSource: settings.recording.audioSource,
-                        webcamEnabled: settings.recording.webcamEnabled,
-                    };
-                    chrome.runtime.sendMessage({ type: MSG.RECORDING_START, config, streamId });
-                    window.close();
-                }
-            );
-        });
+        // Send to background — it will call chooseDesktopMedia (popup closes on focus loss)
+        chrome.runtime.sendMessage({ type: MSG.RECORDING_START });
+        window.close();
     };
 
     const handleCopyLink = async (item: UploadHistoryItem) => {

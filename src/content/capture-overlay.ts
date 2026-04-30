@@ -18,7 +18,7 @@ let recPaused = false;
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg.type === MSG.CAPTURE_AREA_START) {
-        showOverlay();
+        showOverlay(msg.dataUrl);
     }
     if (msg.type === 'RECORDING_SHOW_CONTROLS') {
         showRecordingWidget();
@@ -38,8 +38,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     }
     if (msg.type === MSG.FULLPAGE_SCROLL) {
         window.scrollTo(0, msg.y);
-        // Wait for scroll + any lazy-loaded content
-        setTimeout(() => sendResponse({ done: true }), 150);
+        // Wait for scroll + any lazy-loaded content.
+        // Chrome strictly limits captureVisibleTab to 2 calls per second.
+        // We must delay at least 500ms to avoid MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND error.
+        setTimeout(() => sendResponse({ done: true }), 550);
         return true;
     }
     if (msg.type === MSG.FULLPAGE_DONE) {
@@ -47,17 +49,22 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     }
 });
 
-function showOverlay() {
+function showOverlay(dataUrl?: string) {
     removeOverlay();
 
     overlay = document.createElement('div');
     overlay.id = 'proscreen-overlay';
+    
+    const backgroundStyle = dataUrl 
+        ? `background-image: url(${dataUrl}); background-size: 100% 100%; background-repeat: no-repeat;`
+        : `background: transparent;`;
+        
     overlay.style.cssText = `
         position: fixed;
         inset: 0;
         z-index: 2147483647;
         cursor: crosshair;
-        background: rgba(0, 0, 0, 0.3);
+        ${backgroundStyle}
     `;
 
     selectionBox = document.createElement('div');
@@ -68,7 +75,12 @@ function showOverlay() {
         background: transparent;
         box-shadow: 0 0 0 9999px rgba(18, 20, 23, 0.45);
         z-index: 2147483647;
-        display: none;
+        left: -100px;
+        top: -100px;
+        width: 0px;
+        height: 0px;
+        display: block;
+        pointer-events: none;
     `;
 
     dimensionLabel = document.createElement('div');
@@ -102,7 +114,6 @@ function onMouseDown(e: MouseEvent) {
     startY = e.clientY;
 
     if (selectionBox) {
-        selectionBox.style.display = 'block';
         selectionBox.style.left = `${startX}px`;
         selectionBox.style.top = `${startY}px`;
         selectionBox.style.width = '0';
