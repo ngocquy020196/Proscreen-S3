@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://proscreen-s3.ngocquy.dev/sitemap.xml
