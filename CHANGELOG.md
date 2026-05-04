@@ -2,6 +2,16 @@
 
 All notable changes to ProScreen will be documented in this file.
 
+## v0.0.2 - 2026-05-04
+
+### Changed
+- Fixed: Keyboard shortcuts (Alt+S, Alt+A, Alt+R) now work correctly on macOS and inside the popup
+- Optimized: Migrated screenshot storage from `chrome.storage.local` to `IndexedDB` to handle massive full-page captures without `QuotaExceededError`
+- Optimized: Offscreen document is now properly closed after recording to free up RAM
+- Fixed: Limited `OffscreenCanvas` height to `16384px` to prevent browser crashes on extremely long pages
+- Improved: Video recordings are no longer auto-deleted upon loading, preventing accidental loss when refreshing the editor tab
+- UI: Used shorter app name in popup and options headers for better aesthetics
+
 ## v0.0.1 - 2026-04-30
 
 ### Added

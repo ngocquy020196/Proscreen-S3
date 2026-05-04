@@ -1,4 +1,5 @@
 import { MSG } from '../constants/messages';
+import { saveImageBlob } from '../lib/image-store';
 
 const MENU_ID_CAPTURE = 'proscreen-capture';
 
@@ -211,15 +212,18 @@ async function handleCaptureFullPage() {
     if (captures.length === 0) return;
 
     // Stitch all captures into one tall image using OffscreenCanvas
+    const MAX_CANVAS_HEIGHT = 16384;
+    const finalHeight = Math.min(totalHeight, MAX_CANVAS_HEIGHT);
     const firstImg = await fetchBitmap(captures[0].dataUrl);
     const imgW = firstImg.width;
     const imgH = firstImg.height;
-    const canvas = new OffscreenCanvas(imgW, totalHeight);
+    const canvas = new OffscreenCanvas(imgW, finalHeight);
     const ctx = canvas.getContext('2d')!;
 
     for (const { dataUrl, y: captureY } of captures) {
+        if (captureY >= finalHeight) break;
         const bitmap = await fetchBitmap(dataUrl);
-        const remaining = totalHeight - captureY;
+        const remaining = finalHeight - captureY;
         const drawH = Math.min(imgH, remaining);
         ctx.drawImage(bitmap, 0, 0, imgW, drawH, 0, captureY, imgW, drawH);
     }
@@ -309,10 +313,13 @@ function handleRecordingData() {
         }
     });
 
-    // Video data is already in chrome.storage.local._pendingVideo (saved by offscreen)
+    // Video data is already in IndexedDB (saved by offscreen)
     chrome.tabs.create({
         url: chrome.runtime.getURL('video.html'),
     });
+
+    // Cleanup offscreen document
+    chrome.offscreen.closeDocument().catch(() => {});
 }
 
 // ─── Offscreen Document ──────────────────────────────────────────────────────
@@ -333,11 +340,15 @@ async function createOffscreenIfNeeded() {
 
 // ─── Editor ──────────────────────────────────────────────────────────────────
 
-function openEditor(dataUrl: string) {
-    // Store capture data temporarily, then open editor
-    chrome.storage.local.set({ _pendingCapture: dataUrl }, () => {
+async function openEditor(dataUrl: string) {
+    try {
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        await saveImageBlob(blob);
         chrome.tabs.create({
             url: chrome.runtime.getURL('editor.html'),
         });
-    });
+    } catch (err) {
+        console.error('Failed to open editor:', err);
+    }
 }

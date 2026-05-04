@@ -8,6 +8,9 @@
     "appTagline": {
         "message": "Screenshot · Record · Upload"
     },
+    "popupName": {
+        "message": "ProScreen S3"
+    },
     "screenshot": {
         "message": "Screenshot"
     },

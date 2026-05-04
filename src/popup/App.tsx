@@ -31,6 +31,23 @@ const App: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.altKey && e.code === 'KeyS') {
+                e.preventDefault();
+                handleCapture(MSG.CAPTURE_VISIBLE);
+            } else if (e.altKey && e.code === 'KeyA') {
+                e.preventDefault();
+                handleCapture(MSG.CAPTURE_AREA_START);
+            } else if (e.altKey && e.code === 'KeyR') {
+                e.preventDefault();
+                handleRecordingClick();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isRecording]);
+
+    useEffect(() => {
         document.documentElement.dataset.theme = settings.theme;
     }, [settings.theme]);
 
@@ -41,19 +58,18 @@ const App: React.FC = () => {
     if (!loaded) return null;
 
     const handleCapture = (type: string) => {
-        chrome.runtime.sendMessage({ type });
-        window.close();
+        chrome.runtime.sendMessage({ type }, () => {
+            window.close();
+        });
     };
 
     const handleRecordingClick = () => {
         if (isRecording) {
-            chrome.runtime.sendMessage({ type: MSG.RECORDING_STOP });
-            window.close();
+            chrome.runtime.sendMessage({ type: MSG.RECORDING_STOP }, () => window.close());
             return;
         }
         // Send to background — it will call chooseDesktopMedia (popup closes on focus loss)
-        chrome.runtime.sendMessage({ type: MSG.RECORDING_START });
-        window.close();
+        chrome.runtime.sendMessage({ type: MSG.RECORDING_START }, () => window.close());
     };
 
     const handleCopyLink = async (item: UploadHistoryItem) => {
@@ -91,7 +107,7 @@ const App: React.FC = () => {
                         </svg>
                     </div>
                     <div className="header-text">
-                        <h1>{t('appName')}</h1>
+                        <h1>{t('popupName')}</h1>
                         <p>{t('appTagline')}</p>
                         <span className="storage-badge" style={{ color: storageConfigured ? storageColor : '#f85149' }}>
                             <span className="storage-badge-dot" style={{ background: storageConfigured ? storageColor : '#f85149' }} />

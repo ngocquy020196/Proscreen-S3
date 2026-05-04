@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Google tag (gtag.js) - Placeholder -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProScreen S3 — Screen Recorder & Capture to your own Cloud</title>
+    <meta name="description"
+        content="Professional screen recorder and screenshot tool that uploads directly to your own AWS S3, Cloudflare R2, or MinIO bucket. 100% private, no limits." />
+    <meta name="keywords"
+        content="screen recorder, screenshot, aws s3, cloudflare r2, minio, chrome extension, edge extension, video capture" />
+    <meta name="author" content="Quy Nguyen" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#09090b" />
+    <link rel="canonical" href="https://proscreen-s3.ngocquy.dev/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="ProScreen S3 — Screen Recorder & Capture" />
+    <meta property="og:description"
+        content="Professional screen recorder and screenshot tool that uploads directly to your own AWS S3, Cloudflare R2, or MinIO bucket." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://proscreen-s3.ngocquy.dev/" />
+    <meta property="og:image" content="https://proscreen-s3.ngocquy.dev/images/proscreen_640x400.png" />
+    <meta property="og:image:alt" content="ProScreen S3 interface" />
+    <meta property="og:site_name" content="ProScreen S3" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ProScreen S3 — Screen Recorder & Capture" />
+    <meta name="twitter:description"
+        content="Professional screen recorder and screenshot tool that uploads directly to your own AWS S3, Cloudflare R2, or MinIO bucket." />
+    <meta name="twitter:image" content="https://proscreen-s3.ngocquy.dev/images/proscreen_640x400.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="128x128" href="images/icon128.png" />
+    <link rel="apple-touch-icon" href="images/icon128.png" />
+
+    <!-- Fonts & Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+        media="print" onload="this.media='all'" />
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" />
+    </noscript>
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "ProScreen S3",
+        "description": "Professional screen recorder and screenshot tool that uploads directly to your own AWS S3, Cloudflare R2, or MinIO bucket.",
+        "applicationCategory": "BrowserApplication",
+        "operatingSystem": "Chrome, Edge, Firefox, Brave, Vivaldi",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Quy Nguyen",
+            "url": "https://ngocquy.dev"
+        },
+        "softwareVersion": "0.0.2",
+        "url": "https://proscreen-s3.ngocquy.dev/",
+        "downloadUrl": "https://github.com/ngocquy020196/proscreen-s3",
+        "featureList": "Screen Recording, Screenshot Capture, S3 Upload, R2 Upload, Annotation Editor, Local Storage",
+        "inLanguage": "en"
+    }
+    </script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <img src="images/icon128.png" alt="ProScreen S3" width="32" height="32" />
+                <span>ProScreen S3</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#screenshots">Screenshots</a>
+                <a href="/changelog.html">Changelog</a>
+                <a href="https://github.com/ngocquy020196/proscreen-s3" target="_blank" rel="noopener"
+                    class="nav-github">
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                        <path
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                        </path>
+                    </svg>
+                    <span id="navStarCount">–</span>
+                </a>
+                <a href="#install" class="nav-cta">Install Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="hero-glow hero-glow-1"></div>
+            <div class="hero-glow hero-glow-2"></div>
+            <div class="hero-grid-lines"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-badges">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    100% Private & Open Source
+                </div>
+                <a href="https://github.com/ngocquy020196/proscreen-s3" target="_blank" rel="noopener"
+                    class="hero-badge hero-github-link">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                        <path
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                        </path>
+                    </svg>
+                    View on GitHub
+                </a>
+            </div>
+            <h1>
+                Capture. Record.<br />
+                <span class="gradient-text">Upload to Your Cloud.</span>
+            </h1>
+            <p class="hero-subtitle">
+                Professional screen recorder and screenshot tool that uploads directly to your own <strong>AWS S3</strong>, <strong>Cloudflare R2</strong>, or <strong>MinIO</strong> bucket. Zero limits, full privacy.
+            </p>
+            <div class="hero-actions">
+                <a href="https://chromewebstore.google.com/detail/proscreen-s3-screenshots/cjgpljppegbggekffnmaiagodipppdkc"
+                    target="_blank" rel="noopener" class="btn btn-chrome">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
+                        <circle cx="12" cy="12" r="4" fill="currentColor" />
+                        <path d="M12 8L20.5 8" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M8 14L3.5 5" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M16 14L12 22" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                    Add to Chrome
+                </a>
+                <a href="#" class="btn btn-edge">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path
+                            d="M21.86 17.86q.14 0 .25.12.1.13.1.25t-.11.33l-.32.46q-.43.58-1.15 1.13-.71.55-1.73 1.01-1.03.47-2.37.76-1.34.28-2.95.28-2.03 0-3.81-.65-1.78-.65-3.12-1.87-1.33-1.21-2.11-2.94-.78-1.72-.78-3.87 0-1.88.58-3.56.58-1.68 1.63-2.96Q7.01 5.08 8.35 4.2q1.34-.89 2.85-1.34 1.5-.45 3.01-.45 1.22 0 2.15.31.93.31 1.58.77.65.47 1.05.97.4.51.57.88l.13.27q.05.12.05.2 0 .1-.06.17-.07.08-.17.08h-7.46q-.2 0-.47.05-.28.06-.52.2-.25.15-.43.44-.18.3-.18.77 0 .66.35 1.14.34.49.87.81.52.32 1.15.5.62.17 1.16.17h7.08q.16 0 .28-.01.12-.02.24-.02z" />
+                    </svg>
+                    Add to Edge
+                </a>
+                <a href="#" target="_blank"
+                    rel="noopener" class="btn btn-firefox">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path
+                            d="M20.452 3.445a11.002 11.002 0 0 0-4.1-2.868 10.602 10.602 0 0 0-2.497-.727l-.009-.002A10.998 10.998 0 0 0 1.545 8.347a11 11 0 0 0 9.453 12.609 10.959 10.959 0 0 0 7.702-2.2 10.997 10.997 0 0 0 1.752-16.311zM16.96 17.2a5.2 5.2 0 0 1-2.069 1.248 7.094 7.094 0 0 1-2.436.465 6.28 6.28 0 0 1-4.56-1.724 7.3 7.3 0 0 1-1.202-1.64.443.443 0 0 1 .148-.57c.012-.007.182-.098.361-.025a5.055 5.055 0 0 0 1.842.405 2.52 2.52 0 0 0 1.453-.409 1.199 1.199 0 0 0 .478-.87 1.052 1.052 0 0 0-.473-.885 5.73 5.73 0 0 0-1.69-.765 6.164 6.164 0 0 1-2.509-1.474 3.316 3.316 0 0 1-.833-2.36A3.87 3.87 0 0 1 6.803 6.8a5.107 5.107 0 0 1 2.373-1.718 3.256 3.256 0 0 0-.452.8 4.404 4.404 0 0 0-.208 1.997 3.6 3.6 0 0 0 .718 1.578c.504-.123 1.027-.178 1.522-.29a7.053 7.053 0 0 0 2.002-.81 3.524 3.524 0 0 0 1.396-1.4 3.126 3.126 0 0 0 .3-1.882 5.107 5.107 0 0 0-.833-2.028 4.382 4.382 0 0 1 1.56.822 7.678 7.678 0 0 1 2.199 3.09 2.508 2.508 0 0 0 1.092-.465c.086-.067.274-.222.372-.215a.202.202 0 0 1 .164.149 7.027 7.027 0 0 1 .112 2.255 7.717 7.717 0 0 1-.79 2.735A7.684 7.684 0 0 1 16.96 17.2z" />
+                    </svg>
+                    Add to Firefox
+                </a>
+            </div>
+            <p class="hero-note">Works on Chrome, Edge, Brave, Vivaldi & all Chromium browsers</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Everything you need for<br /><span class="gradient-text">professional sharing</span></h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="23 7 16 12 23 17 23 7" />
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                        </svg>
+                    </div>
+                    <h3>HD Screen Recording</h3>
+                    <p>Record your screen, tab, or camera with audio. Features a draggable control widget with timer and pause support.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                            <circle cx="12" cy="13" r="4" />
+                        </svg>
+                    </div>
+                    <h3>Advanced Screenshot</h3>
+                    <p>Capture visible area, select a specific region, or take scrolling full-page screenshots with ease.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
+                    </div>
+                    <h3>Annotation Editor</h3>
+                    <p>Built-in editor to add text, arrows, rectangles, blur sensitive info, and crop your captures before uploading.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                        </svg>
+                    </div>
+                    <h3>Bring Your Own Cloud</h3>
+                    <p>Zero dependency on 3rd party servers. Upload directly to AWS S3, Cloudflare R2, MinIO or any S3-compatible API.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                    </div>
+                    <h3>100% Privacy</h3>
+                    <p>No account required. Your files go straight from your browser to your bucket. We never see your data.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="13 2 13 9 20 9" />
+                            <path d="M20 16v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9l5 5v1" />
+                            <path d="M10 13h4" />
+                            <path d="M10 17h4" />
+                            <path d="M14 11l2 2-2 2" />
+                        </svg>
+                    </div>
+                    <h3>Local Storage</h3>
+                    <p>Upload history is saved locally. Download files directly to your device if you don't want to use S3.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section class="screenshots" id="screenshots">
+        <div class="container">
+            <h2 class="section-title">Designed to be<br /><span class="gradient-text">simple & powerful</span></h2>
+            <div class="screenshots-grid" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto;">
+                <div class="screenshot-card">
+                    <div class="screenshot-label">Extension Promo</div>
+                    <img src="images/proscreen_640x400.png"
+                        alt="ProScreen S3 Promo showing capture and record options"
+                        loading="lazy" width="640" height="400" style="object-fit: contain; background: #1a1a1a;" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta" id="install">
+        <div class="container">
+            <div class="cta-card">
+                <h2>Ready to take control of your captures?</h2>
+                <p>Install ProScreen S3 for free and start saving directly to your own cloud.</p>
+                <div class="hero-actions">
+                    <a href="https://chromewebstore.google.com/detail/proscreen-s3-screenshots/cjgpljppegbggekffnmaiagodipppdkc"
+                        target="_blank" rel="noopener" class="btn btn-chrome">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
+                            <circle cx="12" cy="12" r="4" fill="currentColor" />
+                            <path d="M12 8L20.5 8" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M8 14L3.5 5" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M16 14L12 22" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                        Chrome Web Store
+                    </a>
+                    <a href="#"
+                        target="_blank" rel="noopener" class="btn btn-edge">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path
+                                d="M21.86 17.86q.14 0 .25.12.1.13.1.25t-.11.33l-.32.46q-.43.58-1.15 1.13-.71.55-1.73 1.01-1.03.47-2.37.76-1.34.28-2.95.28-2.03 0-3.81-.65-1.78-.65-3.12-1.87-1.33-1.21-2.11-2.94-.78-1.72-.78-3.87 0-1.88.58-3.56.58-1.68 1.63-2.96Q7.01 5.08 8.35 4.2q1.34-.89 2.85-1.34 1.5-.45 3.01-.45 1.22 0 2.15.31.93.31 1.58.77.65.47 1.05.97.4.51.57.88l.13.27q.05.12.05.2 0 .1-.06.17-.07.08-.17.08h-7.46q-.2 0-.47.05-.28.06-.52.2-.25.15-.43.44-.18.3-.18.77 0 .66.35 1.14.34.49.87.81.52.32 1.15.5.62.17 1.16.17h7.08q.16 0 .28-.01.12-.02.24-.02z" />
+                        </svg>
+                        Edge Add-ons
+                    </a>
+                    <a href="#"
+                        target="_blank" rel="noopener" class="btn btn-firefox">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path
+                                d="M20.452 3.445a11.002 11.002 0 0 0-4.1-2.868 10.602 10.602 0 0 0-2.497-.727l-.009-.002A10.998 10.998 0 0 0 1.545 8.347a11 11 0 0 0 9.453 12.609 10.959 10.959 0 0 0 7.702-2.2 10.997 10.997 0 0 0 1.752-16.311zM16.96 17.2a5.2 5.2 0 0 1-2.069 1.248 7.094 7.094 0 0 1-2.436.465 6.28 6.28 0 0 1-4.56-1.724 7.3 7.3 0 0 1-1.202-1.64.443.443 0 0 1 .148-.57c.012-.007.182-.098.361-.025a5.055 5.055 0 0 0 1.842.405 2.52 2.52 0 0 0 1.453-.409 1.199 1.199 0 0 0 .478-.87 1.052 1.052 0 0 0-.473-.885 5.73 5.73 0 0 0-1.69-.765 6.164 6.164 0 0 1-2.509-1.474 3.316 3.316 0 0 1-.833-2.36A3.87 3.87 0 0 1 6.803 6.8a5.107 5.107 0 0 1 2.373-1.718 3.256 3.256 0 0 0-.452.8 4.404 4.404 0 0 0-.208 1.997 3.6 3.6 0 0 0 .718 1.578c.504-.123 1.027-.178 1.522-.29a7.053 7.053 0 0 0 2.002-.81 3.524 3.524 0 0 0 1.396-1.4 3.126 3.126 0 0 0 .3-1.882 5.107 5.107 0 0 0-.833-2.028 4.382 4.382 0 0 1 1.56.822 7.678 7.678 0 0 1 2.199 3.09 2.508 2.508 0 0 0 1.092-.465c.086-.067.274-.222.372-.215a.202.202 0 0 1 .164.149 7.027 7.027 0 0 1 .112 2.255 7.717 7.717 0 0 1-.79 2.735A7.684 7.684 0 0 1 16.96 17.2z" />
+                        </svg>
+                        Firefox Add-ons
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="images/icon128.png" alt="ProScreen S3" width="28" height="28" />
+                    <span>ProScreen S3</span>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/ngocquy020196/proscreen-s3" target="_blank"
+                        rel="noopener">GitHub</a>
+                    <a href="/privacy.html" rel="noopener">Privacy</a>
+                    <a href="/changelog.html">Changelog</a>
+                    <a href="https://ngocquy.dev" target="_blank" rel="noopener">Author</a>
+                    <a href="mailto:contact@ngocquy.dev">Contact</a>
+                    <a href="https://buymeacoffee.com/ngocquy.dev" target="_blank" rel="noopener">Buy Me a Coffee</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Powered by <a href="https://ngocquy.dev" target="_blank" rel="noopener">Quy Nguyen</a>.
+                    Version <span id="appVersion">0.0.2</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Browser detection — highlight matching install button
+        (function () {
+            const ua = navigator.userAgent;
+            let activeClass = 'btn-chrome';
+            if (ua.includes('Firefox/')) activeClass = 'btn-firefox';
+            else if (ua.includes('Edg/')) activeClass = 'btn-edge';
+            document.querySelectorAll('.btn-chrome, .btn-edge, .btn-firefox').forEach(btn => {
+                if (btn.classList.contains(activeClass)) {
+                    btn.classList.add('btn-active');
+                }
+            });
+        })();
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return;
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Nav background on scroll
+        const nav = document.querySelector('.nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('nav-scrolled', window.scrollY > 50);
+        });
+
+        // Animate elements on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.feature-card, .screenshot-card, .grid-type-card').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Fetch GitHub star count and latest version in parallel
+        Promise.all([
+            fetch('https://api.github.com/repos/ngocquy020196/proscreen-s3').then(r => r.json()),
+            fetch('https://api.github.com/repos/ngocquy020196/proscreen-s3/tags?per_page=1').then(r => r.json()),
+        ]).then(([repo, tags]) => {
+            if (repo.stargazers_count !== undefined) {
+                document.getElementById('navStarCount').textContent = repo.stargazers_count;
+            }
+            if (tags.length && tags[0].name) {
+                document.getElementById('appVersion').textContent = tags[0].name.replace('v', '');
+            }
+        }).catch(() => { });
+    </script>
+</body>
+
+</html>

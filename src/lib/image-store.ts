@@ -1,9 +1,9 @@
-// ─── Video Blob Storage ──────────────────────────────────────────────────────
-// Uses IndexedDB to store/retrieve video blobs efficiently.
-// No base64 conversion needed — stores raw binary, accessible from all extension pages.
+// ─── Image Blob Storage ────────────────────────────────────────────────────────
+// Uses IndexedDB to store/retrieve screenshot blobs efficiently.
+// Avoids QuotaExceededError and memory spikes from Base64 conversion.
 
-const DB_NAME = 'proscreen-video';
-const STORE_NAME = 'recordings';
+const DB_NAME = 'proscreen-image';
+const STORE_NAME = 'screenshots';
 const KEY = 'latest';
 
 function openDB(): Promise<IDBDatabase> {
@@ -17,7 +17,7 @@ function openDB(): Promise<IDBDatabase> {
     });
 }
 
-export async function saveVideoBlob(blob: Blob): Promise<void> {
+export async function saveImageBlob(blob: Blob): Promise<void> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -27,7 +27,7 @@ export async function saveVideoBlob(blob: Blob): Promise<void> {
     });
 }
 
-export async function loadVideoBlob(): Promise<Blob | null> {
+export async function loadImageBlob(): Promise<Blob | null> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readonly');
@@ -39,7 +39,7 @@ export async function loadVideoBlob(): Promise<Blob | null> {
     });
 }
 
-export async function clearVideoBlob(): Promise<void> {
+export async function clearImageBlob(): Promise<void> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readwrite');

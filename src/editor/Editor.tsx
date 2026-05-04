@@ -4,6 +4,7 @@ import { uploadToS3 } from '../lib/s3-upload';
 import { addHistoryItem, generateId } from '../lib/history';
 import { copyToClipboard } from '../utils/clipboard';
 import { canvasToBlob, generateFilename } from '../utils/image';
+import { loadImageBlob, clearImageBlob } from '../lib/image-store';
 import type { Settings, ImageFormat } from '../types';
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────
@@ -81,9 +82,9 @@ const Editor: React.FC = () => {
 
     useEffect(() => {
         document.documentElement.dataset.theme = 'dark';
-        chrome.storage.local.get('_pendingCapture', (result) => {
-            const dataUrl = result._pendingCapture;
-            if (!dataUrl || !canvasRef.current) return;
+        loadImageBlob().then((blob) => {
+            if (!blob || !canvasRef.current) return;
+            const dataUrl = URL.createObjectURL(blob);
             const img = new Image();
             img.onload = () => {
                 const canvas = canvasRef.current!;
@@ -93,7 +94,8 @@ const Editor: React.FC = () => {
                 ctx.drawImage(img, 0, 0);
                 setImageLoaded(true);
                 pushHistory(ctx.getImageData(0, 0, canvas.width, canvas.height), canvas.width, canvas.height);
-                chrome.storage.local.remove('_pendingCapture');
+                URL.revokeObjectURL(dataUrl);
+                clearImageBlob().catch(() => {});
             };
             img.src = dataUrl;
         });

@@ -78,7 +78,7 @@ const Options: React.FC = () => {
     return (
         <div className="options-container">
             <header className="options-header">
-                <h1>{t('appName')} — {t('settings')}</h1>
+                <h1>{t('popupName')} — {t('settings')}</h1>
             </header>
 
             <nav className="options-tabs">
