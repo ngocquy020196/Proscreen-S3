@@ -1,9 +1,9 @@
 {
     "appName": {
-        "message": "ProScreen S3: Screenshots, record and upload to your own S3 storage"
+        "message": "ProScreen S3: Self-Cloud Capture & Record"
     },
     "appDesc": {
-        "message": "Capture screenshots, record screen, annotate, and upload to your own S3 storage. Open source & privacy-first."
+        "message": "Capture screenshots, record screen, and upload to your own S3 storage. Open source & privacy-first."
     },
     "appTagline": {
         "message": "Screenshot · Record · Upload"
@@ -25,6 +25,9 @@
     },
     "captureFullpage": {
         "message": "Capture Full Page"
+    },
+    "captureDesktop": {
+        "message": "Capture Desktop"
     },
     "startRecording": {
         "message": "Start Recording"

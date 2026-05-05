@@ -319,7 +319,7 @@ function handleRecordingData() {
     });
 
     // Cleanup offscreen document
-    chrome.offscreen.closeDocument().catch(() => {});
+    chrome.offscreen.closeDocument().catch(() => { });
 }
 
 // ─── Offscreen Document ──────────────────────────────────────────────────────

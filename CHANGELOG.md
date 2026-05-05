@@ -2,6 +2,14 @@
 
 All notable changes to ProScreen will be documented in this file.
 
+## v0.0.3 - 2026-05-05
+
+### Changed
+- Improved: Updated app name and description for better branding
+- SEO: Added sitemap and robots.txt to landing page
+- Landing Page: Updated hero copy text and formatting
+
+
 ## v0.0.2 - 2026-05-04
 
 ### Changed
