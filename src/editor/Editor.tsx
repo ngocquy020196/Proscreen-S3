@@ -50,7 +50,7 @@ const Editor: React.FC = () => {
     const snapshotBeforeDraw = useRef<ImageData | null>(null);
 
     // History via refs to avoid stale-closure bugs in saveSnapshot
-    type HistoryEntry = { data: ImageData; w: number; h: number };
+    type HistoryEntry = { blob: Blob; w: number; h: number };
     const historyStack = useRef<HistoryEntry[]>([]);
     const historyIdx = useRef(-1);
     const [canUndo, setCanUndo] = useState(false);
@@ -93,7 +93,7 @@ const Editor: React.FC = () => {
                 const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
                 ctx.drawImage(img, 0, 0);
                 setImageLoaded(true);
-                pushHistory(ctx.getImageData(0, 0, canvas.width, canvas.height), canvas.width, canvas.height);
+                saveSnapshot();
                 URL.revokeObjectURL(dataUrl);
                 clearImageBlob().catch(() => {});
             };
@@ -108,11 +108,11 @@ const Editor: React.FC = () => {
         }
     }, [textInput.visible, textInput.x, textInput.y]);
 
-    // ─── History (ref-based) ─────────────────────────────────────────────────
+    // ─── History (ref-based, compressed PNG blobs) ───────────────────────────
 
-    const pushHistory = (snap: ImageData, w: number, h: number) => {
+    const pushHistoryBlob = (blob: Blob, w: number, h: number) => {
         const newStack = historyStack.current.slice(0, historyIdx.current + 1);
-        newStack.push({ data: snap, w, h });
+        newStack.push({ blob, w, h });
         if (newStack.length > 50) newStack.shift();
         historyStack.current = newStack;
         historyIdx.current = newStack.length - 1;
@@ -120,33 +120,38 @@ const Editor: React.FC = () => {
         setCanRedo(false);
     };
 
-    const saveSnapshot = () => {
-        const ctx = getCtx();
-        if (!ctx || !canvasRef.current) return;
-        const { width, height } = canvasRef.current;
-        pushHistory(ctx.getImageData(0, 0, width, height), width, height);
+    const saveSnapshot = async () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const offscreen = new OffscreenCanvas(canvas.width, canvas.height);
+        const offCtx = offscreen.getContext('2d')!;
+        offCtx.drawImage(canvas, 0, 0);
+        const blob = await offscreen.convertToBlob({ type: 'image/png' });
+        pushHistoryBlob(blob, canvas.width, canvas.height);
     };
 
-    const restoreEntry = (entry: HistoryEntry) => {
+    const restoreEntry = async (entry: HistoryEntry) => {
         const ctx = getCtx();
         if (!ctx || !canvasRef.current) return;
+        const bitmap = await createImageBitmap(entry.blob);
         canvasRef.current.width = entry.w;
         canvasRef.current.height = entry.h;
-        ctx.putImageData(entry.data, 0, 0);
+        ctx.drawImage(bitmap, 0, 0);
+        bitmap.close();
     };
 
-    const handleUndo = () => {
+    const handleUndo = async () => {
         if (historyIdx.current <= 0) return;
         historyIdx.current--;
-        restoreEntry(historyStack.current[historyIdx.current]);
+        await restoreEntry(historyStack.current[historyIdx.current]);
         setCanUndo(historyIdx.current > 0);
         setCanRedo(true);
     };
 
-    const handleRedo = () => {
+    const handleRedo = async () => {
         if (historyIdx.current >= historyStack.current.length - 1) return;
         historyIdx.current++;
-        restoreEntry(historyStack.current[historyIdx.current]);
+        await restoreEntry(historyStack.current[historyIdx.current]);
         setCanUndo(true);
         setCanRedo(historyIdx.current < historyStack.current.length - 1);
     };

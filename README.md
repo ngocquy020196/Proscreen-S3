@@ -57,7 +57,9 @@ proscreen-s3/
 │   └── manifest.json           # Extension manifest (Chrome & Edge)
 ├── src/
 │   ├── background/
-│   │   └── index.ts            # Service worker
+│   │   ├── index.ts            # Service worker — message router
+│   │   ├── capture.ts          # Screenshot handlers (visible, area, fullpage)
+│   │   └── recording.ts        # Recording state, timer, offscreen management
 │   ├── content/
 │   │   ├── capture-overlay.ts  # Area selection & recording widget
 │   │   └── content.css         # Content script styles
@@ -66,8 +68,7 @@ proscreen-s3/
 │   │   ├── main.tsx            # Editor entry point
 │   │   └── editor.css          # Editor styles
 │   ├── offscreen/
-│   │   ├── recorder.ts         # Screen recording (MediaRecorder)
-│   │   └── index.html          # Offscreen document
+│   │   └── recorder.ts         # Screen recording (MediaRecorder)
 │   ├── options/
 │   │   ├── Options.tsx         # Settings page & history
 │   │   ├── main.tsx            # Options entry point
@@ -76,7 +77,10 @@ proscreen-s3/
 │   │   ├── App.tsx             # Extension popup UI
 │   │   ├── main.tsx            # Popup entry point
 │   │   └── popup.css           # Popup styles
-│   ├── lib/                    # S3 signer, uploader, history
+│   ├── video/
+│   │   ├── Video.tsx           # Video preview & upload page
+│   │   └── main.tsx            # Video entry point
+│   ├── lib/                    # S3 signer, uploader, history, idb-store
 │   ├── hooks/                  # useSettings hook
 │   ├── i18n/                   # Chrome native i18n wrapper
 │   ├── constants/              # Message types, external links
@@ -85,6 +89,7 @@ proscreen-s3/
 ├── popup.html                  # Popup HTML shell
 ├── options.html                # Options page HTML shell
 ├── editor.html                 # Editor page HTML shell
+├── video.html                  # Video preview HTML shell
 ├── scripts/
 │   └── build-firefox.js        # Firefox manifest generator
 ├── vite.config.ts              # Vite config (multi-target builds)

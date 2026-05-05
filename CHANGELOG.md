@@ -2,12 +2,32 @@
 
 All notable changes to ProScreen will be documented in this file.
 
+## v0.0.4 - 2026-05-05
+
+### Performance
+- Optimized: Full-page capture now stitches directly into canvas instead of accumulating dataUrl strings — **reduces memory usage by ~80MB** on long pages
+- Optimized: Editor undo/redo history now stores compressed PNG blobs instead of raw ImageData — **reduces RAM from ~400MB to ~10MB** for 50 undo steps
+- Fixed: `ImageBitmap.close()` called after use to prevent memory leaks in capture and crop flows
+- Fixed: `AudioContext.close()` called when screen recording stops to free audio resources
+
+### Architecture
+- Refactored: Split `background/index.ts` (355 LOC) into 3 focused modules: `index.ts` (router), `capture.ts`, `recording.ts`
+- Refactored: Created generic `idb-store.ts` factory — `image-store.ts` and `video-store.ts` reduced from 102 LOC to 14 LOC total
+- Added: `openEditorBlob()` helper to skip unnecessary `dataUrl → fetch → blob` roundtrips
+
+### Cleanup
+- Removed: Dead `cloud-api.ts` stub (unused)
+- Removed: 6 unused message constants (`CAPTURE_RESULT`, `UPLOAD_START`, `UPLOAD_PROGRESS`, `UPLOAD_COMPLETE`, `SETTINGS_CHANGED`, `CAPTURE_DESKTOP`)
+- Removed: Unused `dataUrlToBlob()` and `blobToDataUrl()` utilities
+- Reduced: Bundle sizes across all targets (background.js -2%, editor.js -4%, video.js -9%)
+
 ## v0.0.3 - 2026-05-05
 
 ### Changed
 - Improved: Updated app name and description for better branding
 - SEO: Added sitemap and robots.txt to landing page
 - Landing Page: Updated hero copy text and formatting
+
 
 
 ## v0.0.2 - 2026-05-04

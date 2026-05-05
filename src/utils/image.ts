@@ -1,15 +1,5 @@
 import type { ImageFormat } from '../types';
 
-export function dataUrlToBlob(dataUrl: string): Blob {
-    const parts = dataUrl.split(',');
-    const mime = parts[0].match(/:(.*?);/)?.[1] || 'image/png';
-    const byteString = atob(parts[1]);
-    const buffer = new Uint8Array(byteString.length);
-    for (let i = 0; i < byteString.length; i++) {
-        buffer[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([buffer], { type: mime });
-}
 
 export function canvasToBlob(
     canvas: HTMLCanvasElement,

@@ -25,6 +25,8 @@ chrome.runtime.onMessage.addListener((msg) => {
     }
 });
 
+let audioCtxRef: AudioContext | null = null;
+
 async function startRecording(config: { audioSource?: string; webcamEnabled?: boolean }) {
     try {
         // Use getDisplayMedia — Chrome shows native picker automatically
@@ -40,6 +42,7 @@ async function startRecording(config: { audioSource?: string; webcamEnabled?: bo
             try {
                 const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const audioCtx = new AudioContext();
+                audioCtxRef = audioCtx;
                 const dest = audioCtx.createMediaStreamDestination();
 
                 displayStream.getAudioTracks().forEach((track) => {
@@ -81,6 +84,10 @@ async function startRecording(config: { audioSource?: string; webcamEnabled?: bo
 
             // Cleanup
             finalStream.getTracks().forEach((t) => t.stop());
+            if (audioCtxRef) {
+                audioCtxRef.close().catch(() => {});
+                audioCtxRef = null;
+            }
         };
 
         mediaRecorder.start(1000); // 1s timeslice
