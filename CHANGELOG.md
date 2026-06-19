@@ -2,6 +2,11 @@
 
 All notable changes to ProScreen will be documented in this file.
 
+## v1.0.5 - 2026-06-19
+
+### Changed
+- Bumped version to 1.0.5
+
 ## v0.0.4 - 2026-05-05
 
 ### Performance
